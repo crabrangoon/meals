@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Meal Planner</title>
 
 <style>
 
-* { box-sizing: border-box; }
+*{box-sizing:border-box}
 
-:root {
+:root{
   --bg:#f5f7fb;
   --text:#222;
   --card:#fff;
@@ -21,7 +21,7 @@
   --danger:#ef4444;
 }
 
-body.dark {
+body.dark{
   --bg:#111827;
   --text:#f3f4f6;
   --card:#1f2937;
@@ -32,35 +32,33 @@ body.dark {
   --btn:#6366f1;
 }
 
-body {
+body{
   margin:0;
   font-family:Arial;
   background:var(--bg);
   color:var(--text);
 }
 
-header {
+header{
   background:var(--header);
-  color:white;
+  color:#fff;
   padding:14px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
   flex-wrap:wrap;
 }
 
-button {
+button{
   background:var(--btn);
-  color:white;
   border:0;
   padding:10px 12px;
   border-radius:8px;
-  cursor:pointer;
+  color:white;
 }
 
-.danger { background:var(--danger); }
+.danger{background:var(--danger)}
 
-.add-form {
+.add-form{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
@@ -68,7 +66,7 @@ button {
   background:var(--card);
 }
 
-input,textarea,select {
+input,textarea,select{
   padding:10px;
   border-radius:8px;
   border:1px solid var(--border);
@@ -76,30 +74,25 @@ input,textarea,select {
   color:var(--text);
 }
 
-.board {
+.board{
   padding:12px;
   display:flex;
   flex-direction:column;
   gap:14px;
 }
 
-.day-column {
+.day-column{
   background:var(--card);
   padding:12px;
   border-radius:12px;
 }
 
-.meal-list {
+.meal-list{
   min-height:60px;
   padding:6px;
 }
 
-.drop-zone {
-  background:var(--drop);
-  border:2px dashed #60a5fa;
-}
-
-.meal-card {
+.meal-card{
   background:var(--meal);
   border-left:5px solid #4f46e5;
   padding:12px;
@@ -110,21 +103,28 @@ input,textarea,select {
   touch-action:none;
 }
 
-.meal-card.dragging {
+.meal-card.dragging{
   opacity:0.5;
+  position:relative;
+  z-index:999;
 }
 
-.card-actions {
+.card-actions{
   display:flex;
   justify-content:flex-end;
 }
 
-.delete-btn {
+.delete-btn{
   background:var(--danger);
-  font-size:12px;
+  border:0;
   padding:6px 10px;
   border-radius:6px;
-  touch-action: manipulation;
+  font-size:12px;
+}
+
+.drop-zone{
+  background:var(--drop);
+  border:2px dashed #60a5fa;
 }
 
 </style>
@@ -135,7 +135,7 @@ input,textarea,select {
 <header>
   <h1>🍽️ Meal Planner</h1>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+  <div style="display:flex;gap:10px;">
     <button id="themeBtn">🌙 Dark</button>
     <button id="refreshBtn">Refresh</button>
     <button id="clearBtn" class="danger">Clear</button>
@@ -143,22 +143,17 @@ input,textarea,select {
 </header>
 
 <section class="add-form">
-
   <input id="title" placeholder="Meal"/>
   <textarea id="desc" placeholder="Description"></textarea>
 
   <select id="day">
-    <option>Monday</option>
-    <option>Tuesday</option>
-    <option>Wednesday</option>
-    <option>Thursday</option>
-    <option>Friday</option>
-    <option>Saturday</option>
+    <option>Monday</option><option>Tuesday</option>
+    <option>Wednesday</option><option>Thursday</option>
+    <option>Friday</option><option>Saturday</option>
     <option>Sunday</option>
   </select>
 
   <button id="addBtn">Add</button>
-
 </section>
 
 <section id="board" class="board"></section>
@@ -178,8 +173,7 @@ const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sun
 let meals = [];
 
 // ---------------- LOAD ----------------
-async function loadMeals() {
-
+async function loadMeals(){
   const { data } = await supabase
     .from("meals")
     .select("*")
@@ -191,241 +185,198 @@ async function loadMeals() {
 }
 
 // ---------------- GROUP ----------------
-function group() {
-  const g = Object.fromEntries(DAYS.map(d => [d, []]));
-  meals.forEach(m => g[m.day]?.push(m));
+function group(){
+  const g = Object.fromEntries(DAYS.map(d=>[d,[]]));
+  meals.forEach(m=>g[m.day]?.push(m));
   return g;
 }
 
 // ---------------- COLOR ----------------
-function color(id) {
-  const c = ["#fee2e2","#ffedd5","#fef9c3","#dcfce7","#dbeafe","#e0e7ff","#fce7f3"];
-  let h = 0;
-  for (let i=0;i<id.length;i++) h = id.charCodeAt(i) + ((h<<5)-h);
+function color(id){
+  const c=["#fee2e2","#ffedd5","#fef9c3","#dcfce7","#dbeafe","#e0e7ff","#fce7f3"];
+  let h=0;
+  for(let i=0;i<id.length;i++)h=id.charCodeAt(i)+((h<<5)-h);
   return c[Math.abs(h)%c.length];
 }
 
 // ---------------- RENDER ----------------
-function render() {
+function render(){
 
-  const board = document.getElementById("board");
-  board.innerHTML = "";
+  const board=document.getElementById("board");
+  board.innerHTML="";
 
-  const grouped = group();
+  const grouped=group();
 
-  DAYS.forEach(day => {
+  DAYS.forEach(day=>{
 
-    const col = document.createElement("div");
-    col.className = "day-column";
+    const col=document.createElement("div");
+    col.className="day-column";
 
-    col.innerHTML = `
+    col.innerHTML=`
       <h2>${day}</h2>
       <div class="meal-list" data-day="${day}"></div>
     `;
 
-    const list = col.querySelector(".meal-list");
+    const list=col.querySelector(".meal-list");
 
-    grouped[day].forEach(m => {
-      list.appendChild(createCard(m));
+    grouped[day].forEach(m=>{
+      list.appendChild(card(m));
     });
 
-    enableDrop(list);
     board.appendChild(col);
   });
 }
 
-// ---------------- CARD ----------------
-function createCard(m) {
+// ---------------- CARD (ONLY POINTER DRAG) ----------------
+function card(m){
 
-  const el = document.createElement("div");
-  el.className = "meal-card";
-  el.dataset.id = m.id;
-  el.draggable = true;
+  const el=document.createElement("div");
+  el.className="meal-card";
+  el.dataset.id=m.id;
 
   el.style.background =
     document.body.classList.contains("dark")
       ? "#374151"
       : color(m.id);
 
-  el.innerHTML = `
+  el.innerHTML=`
     <h3>${m.title}</h3>
-    <p>${m.description || ""}</p>
+    <p>${m.description||""}</p>
     <div class="card-actions">
       <button class="delete-btn">Delete</button>
     </div>
   `;
 
-  // desktop drag
-  el.addEventListener("dragstart", () => el.classList.add("dragging"));
-  el.addEventListener("dragend", async () => {
-    el.classList.remove("dragging");
-    clearDrop();
-    await sync();
-  });
+  // POINTER DRAG ONLY (stable)
+  el.addEventListener("pointerdown",e=>{
 
-  // stable pointer drag (FIXED)
-  el.addEventListener("pointerdown", e => {
-
-    if (e.target.closest(".delete-btn")) return;
+    if(e.target.closest(".delete-btn")) return;
 
     el.setPointerCapture(e.pointerId);
     el.classList.add("dragging");
 
-    function move(ev) {
+    function move(ev){
 
-      const target = document.elementFromPoint(ev.clientX, ev.clientY);
-      const list = target?.closest?.(".meal-list");
+      const target=document.elementFromPoint(ev.clientX,ev.clientY);
+      const list=target?.closest?.(".meal-list");
+      if(!list) return;
 
-      if (!list) return;
+      const cards=[...list.querySelectorAll(".meal-card")].filter(c=>c!==el);
 
-      const cards = [...list.querySelectorAll(".meal-card")].filter(c => c !== el);
-
-      const after = cards.find(card => {
-        const r = card.getBoundingClientRect();
-        return ev.clientY < r.top + r.height / 2;
+      const after=cards.find(c=>{
+        const r=c.getBoundingClientRect();
+        return ev.clientY < r.top + r.height/2;
       });
 
-      if (!after) list.appendChild(el);
-      else list.insertBefore(el, after);
+      if(!after) list.appendChild(el);
+      else list.insertBefore(el,after);
     }
 
-    async function up() {
+    async function up(){
+
       el.classList.remove("dragging");
-      clearDrop();
 
-      el.removeEventListener("pointermove", move);
-      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointermove",move);
+      el.removeEventListener("pointerup",up);
 
-      await sync(); // ONLY sync once
+      await sync(); // ONLY HERE (no mid drag sync)
     }
 
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerup", up);
+    el.addEventListener("pointermove",move);
+    el.addEventListener("pointerup",up);
   });
 
-  // delete
-  el.querySelector(".delete-btn").onclick = async e => {
+  el.querySelector(".delete-btn").onclick=async e=>{
     e.stopPropagation();
-    await supabase.from("meals").delete().eq("id", m.id);
+    await supabase.from("meals").delete().eq("id",m.id);
     await loadMeals();
   };
 
   return el;
 }
 
-// ---------------- DROP ----------------
-function enableDrop(list) {
+// ---------------- SYNC (SAFE) ----------------
+async function sync(){
 
-  list.ondragover = e => {
-    e.preventDefault();
-    clearDrop();
-    list.classList.add("drop-zone");
-  };
+  const updates=[];
 
-  list.ondrop = async () => {
-    clearDrop();
-    await sync();
-  };
-}
+  DAYS.forEach(day=>{
 
-function clearDrop() {
-  document.querySelectorAll(".meal-list")
-    .forEach(l => l.classList.remove("drop-zone"));
-}
+    const list=document.querySelector(`[data-day="${day}"]`);
+    const cards=[...list.querySelectorAll(".meal-card")];
 
-// ---------------- SYNC ----------------
-async function sync() {
-
-  const updates = [];
-
-  DAYS.forEach(day => {
-
-    const list = document.querySelector(`[data-day="${day}"]`);
-    const cards = [...list.querySelectorAll(".meal-card")];
-
-    cards.forEach((c, i) => {
+    cards.forEach((c,i)=>{
       updates.push({
-        id: c.dataset.id,
+        id:c.dataset.id,
         day,
-        position: i
+        position:i
       });
     });
 
   });
 
-  await Promise.all(
-    updates.map(u =>
-      supabase
-        .from("meals")
-        .update({
-          day: u.day,
-          position: u.position
-        })
-        .eq("id", u.id)
-    )
-  );
+  for(const u of updates){
+    await supabase
+      .from("meals")
+      .update({
+        day:u.day,
+        position:u.position
+      })
+      .eq("id",u.id);
+  }
 
   await loadMeals();
 }
 
 // ---------------- ADD ----------------
-async function add() {
+async function add(){
 
-  const title = titleEl.value.trim();
-  const desc = descEl.value.trim();
-  const day = dayEl.value;
+  const title=titleEl.value.trim();
+  const desc=descEl.value.trim();
+  const day=dayEl.value;
 
-  if (!title) return;
+  if(!title) return;
 
   await supabase.from("meals").insert({
-    id: crypto.randomUUID(),
+    id:crypto.randomUUID(),
     title,
-    description: desc,
+    description:desc,
     day,
-    position: 0
+    position:0
   });
 
-  titleEl.value = "";
-  descEl.value = "";
+  titleEl.value="";
+  descEl.value="";
 
   await loadMeals();
 }
 
 // ---------------- CLEAR ----------------
-async function clearAll() {
-  if (!confirm("Delete all meals?")) return;
-
+async function clearAll(){
+  if(!confirm("Delete all?")) return;
   await supabase.from("meals").delete().not("id","is",null);
-  meals = [];
+  meals=[];
   render();
 }
 
 // ---------------- THEME ----------------
-function toggleTheme() {
+document.getElementById("themeBtn").onclick=()=>{
   document.body.classList.toggle("dark");
-  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-}
-
-function loadTheme() {
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark");
-  }
-}
+};
 
 // ---------------- UI ----------------
-const titleEl = document.getElementById("title");
-const descEl = document.getElementById("desc");
-const dayEl = document.getElementById("day");
+const titleEl=document.getElementById("title");
+const descEl=document.getElementById("desc");
+const dayEl=document.getElementById("day");
 
-document.getElementById("addBtn").onclick = add;
-document.getElementById("refreshBtn").onclick = loadMeals;
-document.getElementById("clearBtn").onclick = clearAll;
-document.getElementById("themeBtn").onclick = toggleTheme;
+document.getElementById("addBtn").onclick=add;
+document.getElementById("refreshBtn").onclick=loadMeals;
+document.getElementById("clearBtn").onclick=clearAll;
 
 // ---------------- INIT ----------------
-loadTheme();
 loadMeals();
 
 </script>
+
 </body>
 </html>
