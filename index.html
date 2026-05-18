@@ -41,7 +41,7 @@ body {
 
 header {
   background:var(--header);
-  color:#fff;
+  color:white;
   padding:14px;
   display:flex;
   justify-content:space-between;
@@ -51,7 +51,7 @@ header {
 
 button {
   background:var(--btn);
-  color:#fff;
+  color:white;
   border:0;
   padding:10px 12px;
   border-radius:8px;
@@ -110,7 +110,9 @@ input,textarea,select {
   touch-action:none;
 }
 
-.meal-card.dragging { opacity:0.5; }
+.meal-card.dragging {
+  opacity:0.5;
+}
 
 .card-actions {
   display:flex;
@@ -122,6 +124,7 @@ input,textarea,select {
   font-size:12px;
   padding:6px 10px;
   border-radius:6px;
+  touch-action: manipulation;
 }
 
 </style>
@@ -140,8 +143,9 @@ input,textarea,select {
 </header>
 
 <section class="add-form">
+
   <input id="title" placeholder="Meal"/>
-  <textarea id="desc" placeholder="Desc"></textarea>
+  <textarea id="desc" placeholder="Description"></textarea>
 
   <select id="day">
     <option>Monday</option>
@@ -154,6 +158,7 @@ input,textarea,select {
   </select>
 
   <button id="addBtn">Add</button>
+
 </section>
 
 <section id="board" class="board"></section>
@@ -163,15 +168,15 @@ input,textarea,select {
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabase = createClient(
-  "https://oztcdivlafckayzoensb.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96dGNkaXZsYWZja2F5em9lbnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwOTA1ODIsImV4cCI6MjA5NDY2NjU4Mn0.5SOpvBqBSuGDdqd8xsD3ocKZtPV5fwwtvJ0yfwW0viU"
+  "YOUR_SUPABASE_URL",
+  "YOUR_SUPABASE_ANON_KEY"
 );
 
 const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
 let meals = [];
 
-// ---------- LOAD ----------
+// ---------------- LOAD ----------------
 async function loadMeals() {
 
   const { data } = await supabase
@@ -184,14 +189,14 @@ async function loadMeals() {
   render();
 }
 
-// ---------- GROUP ----------
+// ---------------- GROUP ----------------
 function group() {
   const g = Object.fromEntries(DAYS.map(d => [d, []]));
   meals.forEach(m => g[m.day]?.push(m));
   return g;
 }
 
-// ---------- COLOR ----------
+// ---------------- COLOR ----------------
 function color(id) {
   const c = ["#fee2e2","#ffedd5","#fef9c3","#dcfce7","#dbeafe","#e0e7ff","#fce7f3"];
   let h = 0;
@@ -199,7 +204,7 @@ function color(id) {
   return c[Math.abs(h)%c.length];
 }
 
-// ---------- RENDER ----------
+// ---------------- RENDER ----------------
 function render() {
 
   const board = document.getElementById("board");
@@ -220,16 +225,16 @@ function render() {
     const list = col.querySelector(".meal-list");
 
     grouped[day].forEach(m => {
-      list.appendChild(card(m));
+      list.appendChild(createCard(m));
     });
 
-    drop(list);
+    enableDrop(list);
     board.appendChild(col);
   });
 }
 
-// ---------- CARD ----------
-function card(m) {
+// ---------------- CARD ----------------
+function createCard(m) {
 
   const el = document.createElement("div");
   el.className = "meal-card";
@@ -249,7 +254,7 @@ function card(m) {
     </div>
   `;
 
-  // drag start
+  // desktop drag
   el.addEventListener("dragstart", () => el.classList.add("dragging"));
   el.addEventListener("dragend", async () => {
     el.classList.remove("dragging");
@@ -257,7 +262,7 @@ function card(m) {
     await sync();
   });
 
-  // touch drag + reorder
+  // stable pointer drag (FIXED)
   el.addEventListener("pointerdown", e => {
 
     if (e.target.closest(".delete-btn")) return;
@@ -274,9 +279,9 @@ function card(m) {
 
       const cards = [...list.querySelectorAll(".meal-card")].filter(c => c !== el);
 
-      const after = cards.find(c => {
-        const r = c.getBoundingClientRect();
-        return ev.clientY < r.top + r.height/2;
+      const after = cards.find(card => {
+        const r = card.getBoundingClientRect();
+        return ev.clientY < r.top + r.height / 2;
       });
 
       if (!after) list.appendChild(el);
@@ -286,16 +291,18 @@ function card(m) {
     async function up() {
       el.classList.remove("dragging");
       clearDrop();
-      await sync();
 
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", up);
+
+      await sync(); // ONLY sync once
     }
 
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", up);
   });
 
+  // delete
   el.querySelector(".delete-btn").onclick = async e => {
     e.stopPropagation();
     await supabase.from("meals").delete().eq("id", m.id);
@@ -305,8 +312,8 @@ function card(m) {
   return el;
 }
 
-// ---------- DROP ----------
-function drop(list) {
+// ---------------- DROP ----------------
+function enableDrop(list) {
 
   list.ondragover = e => {
     e.preventDefault();
@@ -325,7 +332,7 @@ function clearDrop() {
     .forEach(l => l.classList.remove("drop-zone"));
 }
 
-// ---------- SYNC ORDER ----------
+// ---------------- SYNC ----------------
 async function sync() {
 
   const updates = [];
@@ -345,22 +352,27 @@ async function sync() {
 
   });
 
-  for (const u of updates) {
-    await supabase
-      .from("meals")
-      .update({ day: u.day, position: u.position })
-      .eq("id", u.id);
-  }
+  await Promise.all(
+    updates.map(u =>
+      supabase
+        .from("meals")
+        .update({
+          day: u.day,
+          position: u.position
+        })
+        .eq("id", u.id)
+    )
+  );
 
   await loadMeals();
 }
 
-// ---------- ADD ----------
+// ---------------- ADD ----------------
 async function add() {
 
-  const title = t.value.trim();
-  const desc = d.value.trim();
-  const day = daySel.value;
+  const title = titleEl.value.trim();
+  const desc = descEl.value.trim();
+  const day = dayEl.value;
 
   if (!title) return;
 
@@ -372,45 +384,44 @@ async function add() {
     position: 0
   });
 
-  t.value = "";
-  d.value = "";
+  titleEl.value = "";
+  descEl.value = "";
 
   await loadMeals();
 }
 
-// ---------- CLEAR ----------
+// ---------------- CLEAR ----------------
 async function clearAll() {
-
-  if (!confirm("Delete all?")) return;
+  if (!confirm("Delete all meals?")) return;
 
   await supabase.from("meals").delete().not("id","is",null);
-
   meals = [];
   render();
 }
 
-// ---------- THEME ----------
+// ---------------- THEME ----------------
 function toggleTheme() {
   document.body.classList.toggle("dark");
   localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
 }
 
 function loadTheme() {
-  const t = localStorage.getItem("theme");
-  if (t === "dark") document.body.classList.add("dark");
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+  }
 }
 
-// ---------- UI ----------
-const t = document.getElementById("title");
-const d = document.getElementById("desc");
-const daySel = document.getElementById("day");
+// ---------------- UI ----------------
+const titleEl = document.getElementById("title");
+const descEl = document.getElementById("desc");
+const dayEl = document.getElementById("day");
 
 document.getElementById("addBtn").onclick = add;
 document.getElementById("refreshBtn").onclick = loadMeals;
 document.getElementById("clearBtn").onclick = clearAll;
 document.getElementById("themeBtn").onclick = toggleTheme;
 
-// ---------- INIT ----------
+// ---------------- INIT ----------------
 loadTheme();
 loadMeals();
 
