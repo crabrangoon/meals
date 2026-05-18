@@ -172,15 +172,15 @@
 
   <h1>🍽️ Meal Planner</h1>
 
-  <div>
+  <div style="display:flex; gap:10px;">
 
-    <button onclick="loadMeals()">
+    <button id="refreshBtn">
       Refresh
     </button>
 
     <button
       class="danger"
-      onclick="clearMeals()"
+      id="clearBtn"
     >
       Clear All
     </button>
@@ -215,7 +215,7 @@
 
   </select>
 
-  <button onclick="addMeal()">
+  <button id="addBtn">
     Add Meal
   </button>
 
@@ -233,7 +233,7 @@
   } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
   // =========================
-  // SUPABASE CONFIG
+  // SUPABASE
   // =========================
 
   const supabase = createClient(
@@ -242,7 +242,7 @@
 );
 
   // =========================
-  // DAYS
+  // CONSTANTS
   // =========================
 
   const DAYS = [
@@ -281,10 +281,8 @@
     render();
   }
 
-  window.loadMeals = loadMeals;
-
   // =========================
-  // GROUP BY DAY
+  // GROUP
   // =========================
 
   function groupMeals() {
@@ -422,9 +420,6 @@
       "pointerdown",
       e => {
 
-        // prevent delete button
-        // from triggering drag
-
         if (
           e.target.closest(
             ".delete-btn"
@@ -496,7 +491,7 @@
     );
 
     // =====================
-    // DELETE BUTTON
+    // DELETE
     // =====================
 
     const deleteBtn =
@@ -585,7 +580,7 @@
   }
 
   // =========================
-  // SYNC DRAG TO SUPABASE
+  // SYNC TO DB
   // =========================
 
   async function syncDOMToSupabase() {
@@ -626,63 +621,62 @@
   }
 
   // =========================
-  // ADD MEAL
+  // ADD
   // =========================
 
-  window.addMeal =
-    async function () {
+  async function addMeal() {
 
-      const titleInput =
-        document.getElementById(
-          "title"
-        );
+    const titleInput =
+      document.getElementById(
+        "title"
+      );
 
-      const descInput =
-        document.getElementById(
-          "desc"
-        );
+    const descInput =
+      document.getElementById(
+        "desc"
+      );
 
-      const dayInput =
-        document.getElementById(
-          "day"
-        );
+    const dayInput =
+      document.getElementById(
+        "day"
+      );
 
-      const title =
-        titleInput.value.trim();
+    const title =
+      titleInput.value.trim();
 
-      const description =
-        descInput.value.trim();
+    const description =
+      descInput.value.trim();
 
-      const day =
-        dayInput.value;
+    const day =
+      dayInput.value;
 
-      if (!title) {
-        return;
-      }
+    if (!title) {
+      return;
+    }
 
-      const { error } =
-        await supabase
-          .from("meals")
-          .insert({
-            id: crypto.randomUUID(),
-            title,
-            description,
-            day
-          });
+    const { error } =
+      await supabase
+        .from("meals")
+        .insert({
+          id: crypto.randomUUID(),
+          title,
+          description,
+          day
+        });
 
-      if (error) {
-        console.error(error);
-        return;
-      }
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-      titleInput.value = "";
-      descInput.value = "";
+    titleInput.value = "";
+    descInput.value = "";
 
-      await loadMeals();
-    };
+    await loadMeals();
+  }
 
   // =========================
-  // DELETE MEAL
+  // DELETE
   // =========================
 
   async function deleteMeal(id) {
@@ -695,36 +689,74 @@
 
     if (error) {
       console.error(error);
+      alert(error.message);
       return;
     }
 
-    await loadMeals();
+    meals =
+      meals.filter(
+        meal => meal.id !== id
+      );
+
+    render();
   }
 
   // =========================
   // CLEAR ALL
   // =========================
-window.clearMeals = async function () {
 
-  const ok = confirm(
-    "Delete all meals?"
-  );
+  async function clearMeals() {
 
-  if (!ok) return;
+    const ok =
+      window.confirm(
+        "Delete all meals?"
+      );
 
-  const { error } =
-    await supabase
-      .from("meals")
-      .delete()
-      .not("id", "is", null);
+    if (!ok) {
+      return;
+    }
 
-  if (error) {
-    console.error(error);
-    return;
+    const { error } =
+      await supabase
+        .from("meals")
+        .delete()
+        .not("id", "is", null);
+
+    if (error) {
+      console.error(error);
+      alert(error.message);
+      return;
+    }
+
+    meals = [];
+
+    render();
   }
 
-  await loadMeals();
-};
+  // =========================
+  // BUTTON EVENTS
+  // =========================
+
+  document
+    .getElementById("addBtn")
+    .addEventListener(
+      "click",
+      addMeal
+    );
+
+  document
+    .getElementById("refreshBtn")
+    .addEventListener(
+      "click",
+      loadMeals
+    );
+
+  document
+    .getElementById("clearBtn")
+    .addEventListener(
+      "click",
+      clearMeals
+    );
 
   // =========================
   // INITIAL LOAD
