@@ -704,32 +704,27 @@
   // =========================
   // CLEAR ALL
   // =========================
+window.clearMeals = async function () {
 
-  window.clearMeals =
-    async function () {
+  const ok = confirm(
+    "Delete all meals?"
+  );
 
-      const ok =
-        confirm(
-          "Delete all meals?"
-        );
+  if (!ok) return;
 
-      if (!ok) {
-        return;
-      }
+  const { error } =
+    await supabase
+      .from("meals")
+      .delete()
+      .not("id", "is", null);
 
-      const { error } =
-        await supabase
-          .from("meals")
-          .delete()
-          .neq("id", "");
+  if (error) {
+    console.error(error);
+    return;
+  }
 
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      await loadMeals();
-    };
+  await loadMeals();
+};
 
   // =========================
   // INITIAL LOAD
