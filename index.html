@@ -16,17 +16,50 @@
       box-sizing: border-box;
     }
 
+    :root {
+
+      --bg: #f5f7fb;
+      --text: #222;
+      --header: #2d3748;
+      --card: white;
+      --meal: #edf2ff;
+      --border: #ccc;
+      --drop: #dbeafe;
+
+      --button: #4f46e5;
+      --danger: #ef4444;
+    }
+
+    body.dark {
+
+      --bg: #111827;
+      --text: #f3f4f6;
+      --header: #030712;
+      --card: #1f2937;
+      --meal: #374151;
+      --border: #4b5563;
+      --drop: #1e40af;
+
+      --button: #6366f1;
+      --danger: #ef4444;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5f7fb;
-      color: #222;
+      background: var(--bg);
+      color: var(--text);
+
+      transition:
+        background 0.25s ease,
+        color 0.25s ease;
     }
 
     header {
-      background: #2d3748;
+      background: var(--header);
       color: white;
       padding: 16px;
+
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -41,9 +74,11 @@
 
     button {
       border: none;
-      background: #4f46e5;
+      background: var(--button);
       color: white;
+
       padding: 10px 14px;
+
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
@@ -54,25 +89,37 @@
     }
 
     .danger {
-      background: #ef4444;
+      background: var(--danger);
     }
 
     .add-form {
+
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+
       padding: 14px;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+      background: var(--card);
+
+      box-shadow:
+        0 2px 6px rgba(0,0,0,0.05);
     }
 
     input,
     textarea,
     select {
+
       padding: 10px;
+
       border-radius: 8px;
-      border: 1px solid #ccc;
+
+      border: 1px solid var(--border);
+
       font-size: 14px;
+
+      background: var(--card);
+      color: var(--text);
     }
 
     textarea {
@@ -80,44 +127,69 @@
     }
 
     .board {
+
       display: flex;
       flex-direction: column;
+
       gap: 14px;
       padding: 14px;
     }
 
     .day-column {
-      background: white;
+
+      background: var(--card);
+
       border-radius: 14px;
+
       padding: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
     }
 
     .day-column h2 {
+
       margin-top: 0;
       margin-bottom: 12px;
     }
 
     .meal-list {
+
       min-height: 70px;
+
       border-radius: 10px;
+
       padding: 6px;
-      transition: background 0.2s ease;
+
+      transition:
+        background 0.2s ease;
     }
 
     .drop-zone {
-      background: #dbeafe;
-      border: 2px dashed #60a5fa;
+
+      background: var(--drop);
+
+      border:
+        2px dashed #60a5fa;
     }
 
     .meal-card {
-      background: #edf2ff;
-      border-left: 5px solid #4f46e5;
+
+      background: var(--meal);
+
+      border-left:
+        5px solid #4f46e5;
+
       border-radius: 10px;
+
       padding: 12px;
+
       margin-bottom: 10px;
+
       touch-action: none;
+
       cursor: grab;
+
       user-select: none;
     }
 
@@ -126,26 +198,36 @@
     }
 
     .meal-card h3 {
+
       margin: 0 0 8px;
+
       font-size: 16px;
     }
 
     .meal-card p {
+
       margin: 0;
-      color: #444;
+
       font-size: 14px;
     }
 
     .card-actions {
+
       margin-top: 10px;
+
       display: flex;
+
       justify-content: flex-end;
     }
 
     .delete-btn {
-      background: #ef4444;
+
+      background: var(--danger);
+
       font-size: 12px;
+
       padding: 6px 10px;
+
       touch-action: manipulation;
     }
 
@@ -172,7 +254,17 @@
 
   <h1>🍽️ Meal Planner</h1>
 
-  <div style="display:flex; gap:10px;">
+  <div
+    style="
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    "
+  >
+
+    <button id="themeBtn">
+      🌙 Dark Mode
+    </button>
 
     <button id="refreshBtn">
       Refresh
@@ -242,7 +334,7 @@
 );
 
   // =========================
-  // CONSTANTS
+  // DAYS
   // =========================
 
   const DAYS = [
@@ -258,7 +350,7 @@
   let meals = [];
 
   // =========================
-  // LOAD MEALS
+  // LOAD
   // =========================
 
   async function loadMeals() {
@@ -295,7 +387,9 @@
     meals.forEach(meal => {
 
       if (grouped[meal.day]) {
-        grouped[meal.day].push(meal);
+
+        grouped[meal.day]
+          .push(meal);
       }
     });
 
@@ -313,7 +407,8 @@
 
     board.innerHTML = "";
 
-    const grouped = groupMeals();
+    const grouped =
+      groupMeals();
 
     DAYS.forEach(day => {
 
@@ -364,7 +459,8 @@
 
     card.draggable = true;
 
-    card.dataset.id = meal.id;
+    card.dataset.id =
+      meal.id;
 
     card.innerHTML = `
       <h3>${meal.title}</h3>
@@ -453,6 +549,7 @@
             list &&
             list !== card.parentElement
           ) {
+
             list.appendChild(card);
           }
         }
@@ -513,7 +610,9 @@
 
         e.stopPropagation();
 
-        await deleteMeal(meal.id);
+        await deleteMeal(
+          meal.id
+        );
       }
     );
 
@@ -547,6 +646,7 @@
           dragging &&
           dragging.parentNode !== container
         ) {
+
           container.appendChild(
             dragging
           );
@@ -580,7 +680,7 @@
   }
 
   // =========================
-  // SYNC TO DB
+  // SYNC
   // =========================
 
   async function syncDOMToSupabase() {
@@ -658,7 +758,8 @@
       await supabase
         .from("meals")
         .insert({
-          id: crypto.randomUUID(),
+          id:
+            crypto.randomUUID(),
           title,
           description,
           day
@@ -695,7 +796,8 @@
 
     meals =
       meals.filter(
-        meal => meal.id !== id
+        meal =>
+          meal.id !== id
       );
 
     render();
@@ -720,7 +822,11 @@
       await supabase
         .from("meals")
         .delete()
-        .not("id", "is", null);
+        .not(
+          "id",
+          "is",
+          null
+        );
 
     if (error) {
       console.error(error);
@@ -731,6 +837,56 @@
     meals = [];
 
     render();
+  }
+
+  // =========================
+  // DARK MODE
+  // =========================
+
+  function applyTheme(theme) {
+
+    if (theme === "dark") {
+
+      document.body.classList.add(
+        "dark"
+      );
+
+      document.getElementById(
+        "themeBtn"
+      ).textContent =
+        "☀️ Light Mode";
+
+    } else {
+
+      document.body.classList.remove(
+        "dark"
+      );
+
+      document.getElementById(
+        "themeBtn"
+      ).textContent =
+        "🌙 Dark Mode";
+    }
+  }
+
+  function toggleTheme() {
+
+    const isDark =
+      document.body.classList.contains(
+        "dark"
+      );
+
+    const newTheme =
+      isDark
+        ? "light"
+        : "dark";
+
+    localStorage.setItem(
+      "mealTheme",
+      newTheme
+    );
+
+    applyTheme(newTheme);
   }
 
   // =========================
@@ -757,6 +913,24 @@
       "click",
       clearMeals
     );
+
+  document
+    .getElementById("themeBtn")
+    .addEventListener(
+      "click",
+      toggleTheme
+    );
+
+  // =========================
+  // LOAD THEME
+  // =========================
+
+  const savedTheme =
+    localStorage.getItem(
+      "mealTheme"
+    ) || "light";
+
+  applyTheme(savedTheme);
 
   // =========================
   // INITIAL LOAD
