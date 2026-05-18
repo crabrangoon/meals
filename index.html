@@ -1,277 +1,669 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Meal Planner (Supabase)</title>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #f5f7fb;
-}
+  <title>Meal Planner</title>
 
-header {
-  background: #2d3748;
-  color: white;
-  padding: 14px;
-  display: flex;
-  justify-content: space-between;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-button {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
 
-.add-form {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  flex-wrap: wrap;
-  background: white;
-}
+    header {
+      background: #2d3748;
+      color: white;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-input, textarea, select {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
 
-.board {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-}
+    button {
+      border: none;
+      background: #4f46e5;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-.day-column {
-  background: white;
-  border-radius: 12px;
-  padding: 10px;
-}
+    button:hover {
+      opacity: 0.9;
+    }
 
-.meal-list {
-  min-height: 60px;
-  padding: 6px;
-  border-radius: 10px;
-}
+    .danger {
+      background: #ef4444;
+    }
 
-.meal-card {
-  background: #edf2ff;
-  border-left: 5px solid #4f46e5;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  touch-action: none;
-  cursor: grab;
-}
+    .add-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
 
-.meal-card.dragging {
-  opacity: 0.5;
-}
+    input,
+    textarea,
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
 
-.drop-zone {
-  background: #dbeafe;
-}
-</style>
+    textarea {
+      resize: vertical;
+    }
+
+    .board {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .day-column {
+      background: white;
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .day-column h2 {
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+
+    .meal-list {
+      min-height: 70px;
+      border-radius: 10px;
+      padding: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .drop-zone {
+      background: #dbeafe;
+      border: 2px dashed #60a5fa;
+    }
+
+    .meal-card {
+      background: #edf2ff;
+      border-left: 5px solid #4f46e5;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      touch-action: none;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .meal-card.dragging {
+      opacity: 0.5;
+    }
+
+    .meal-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .meal-card p {
+      margin: 0;
+      color: #444;
+      font-size: 14px;
+    }
+
+    .card-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .delete-btn {
+      background: #ef4444;
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    @media (max-width: 600px) {
+      .add-form {
+        flex-direction: column;
+      }
+
+      input,
+      textarea,
+      select,
+      button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
   <h1>🍽️ Meal Planner</h1>
-  <button onclick="loadMeals()">Refresh</button>
+
+  <div>
+    <button onclick="loadMeals()">
+      Refresh
+    </button>
+
+    <button
+      class="danger"
+      onclick="clearMeals()"
+    >
+      Clear All
+    </button>
+  </div>
 </header>
 
-<div class="add-form">
-  <input id="title" placeholder="Meal name"/>
-  <textarea id="desc" placeholder="Description"></textarea>
+<section class="add-form">
+
+  <input
+    type="text"
+    id="title"
+    placeholder="Meal name"
+  />
+
+  <textarea
+    id="desc"
+    rows="1"
+    placeholder="Description"
+  ></textarea>
 
   <select id="day">
-    <option>Monday</option><option>Tuesday</option>
-    <option>Wednesday</option><option>Thursday</option>
-    <option>Friday</option><option>Saturday</option>
+    <option>Monday</option>
+    <option>Tuesday</option>
+    <option>Wednesday</option>
+    <option>Thursday</option>
+    <option>Friday</option>
+    <option>Saturday</option>
     <option>Sunday</option>
   </select>
 
-  <button onclick="addMeal()">Add</button>
-</div>
+  <button onclick="addMeal()">
+    Add Meal
+  </button>
 
-<div class="board" id="board"></div>
+</section>
+
+<section class="board" id="board"></section>
 
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const supabase = createClient(
+  import {
+    createClient
+  } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+  // =========================
+  // SUPABASE CONFIG
+  // =========================
+
+  const supabase = createClient(
   "https://oztcdivlafckayzoensb.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96dGNkaXZsYWZja2F5em9lbnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwOTA1ODIsImV4cCI6MjA5NDY2NjU4Mn0.5SOpvBqBSuGDdqd8xsD3ocKZtPV5fwwtvJ0yfwW0viU"
 );
 
-const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  // =========================
+  // CONSTANTS
+  // =========================
 
-let meals = [];
+  const DAYS = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ];
 
-async function loadMeals() {
-  const { data } = await supabase
-    .from("meals")
-    .select("*")
-    .order("created_at");
+  let meals = [];
 
-  meals = data || [];
-  render();
-}
+  // =========================
+  // LOAD MEALS
+  // =========================
 
-function groupByDay() {
-  const map = Object.fromEntries(DAYS.map(d => [d, []]));
+  async function loadMeals() {
 
-  meals.forEach(m => {
-    if (map[m.day]) map[m.day].push(m);
-  });
+    const { data, error } =
+      await supabase
+        .from("meals")
+        .select("*")
+        .order("created_at");
 
-  return map;
-}
-
-function render() {
-  const board = document.getElementById("board");
-  board.innerHTML = "";
-
-  const grouped = groupByDay();
-
-  DAYS.forEach(day => {
-    const col = document.createElement("div");
-    col.className = "day-column";
-
-    col.innerHTML = `
-      <h2>${day}</h2>
-      <div class="meal-list" data-day="${day}"></div>
-    `;
-
-    const list = col.querySelector(".meal-list");
-
-    grouped[day].forEach(meal => {
-      list.appendChild(createCard(meal));
-    });
-
-    enableDrop(list);
-    board.appendChild(col);
-  });
-}
-
-function createCard(meal) {
-  const el = document.createElement("div");
-  el.className = "meal-card";
-  el.draggable = true;
-  el.dataset.id = meal.id;
-
-  el.innerHTML = `
-    <b>${meal.title}</b>
-    <p>${meal.description || ""}</p>
-    <button onclick="deleteMeal('${meal.id}')">Delete</button>
-  `;
-
-  el.addEventListener("dragstart", () => el.classList.add("dragging"));
-  el.addEventListener("dragend", () => {
-    el.classList.remove("dragging");
-    syncFromDOM();
-  });
-
-  // touch drag
-  el.addEventListener("pointerdown", e => {
-    el.setPointerCapture(e.pointerId);
-    el.classList.add("dragging");
-
-    function move(ev) {
-      const target = document.elementFromPoint(ev.clientX, ev.clientY);
-      const list = target?.closest?.(".meal-list");
-      if (list) list.appendChild(el);
+    if (error) {
+      console.error(error);
+      return;
     }
 
-    function up() {
-      el.classList.remove("dragging");
-      syncFromDOM();
-      el.removeEventListener("pointermove", move);
-      el.removeEventListener("pointerup", up);
-    }
+    meals = data || [];
 
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerup", up);
-  });
-
-  return el;
-}
-
-function enableDrop(list) {
-  list.addEventListener("dragover", e => {
-    e.preventDefault();
-    list.classList.add("drop-zone");
-
-    const dragging = document.querySelector(".dragging");
-    if (dragging) list.appendChild(dragging);
-  });
-
-  list.addEventListener("dragleave", () => {
-    list.classList.remove("drop-zone");
-  });
-
-  list.addEventListener("drop", () => {
-    list.classList.remove("drop-zone");
-    syncFromDOM();
-  });
-}
-
-async function syncFromDOM() {
-  const updates = [];
-
-  DAYS.forEach(day => {
-    const list = document.querySelector(`[data-day="${day}"]`);
-
-    list.querySelectorAll(".meal-card").forEach(card => {
-      updates.push({
-        id: card.dataset.id,
-        day
-      });
-    });
-  });
-
-  for (const u of updates) {
-    await supabase
-      .from("meals")
-      .update({ day: u.day })
-      .eq("id", u.id);
+    render();
   }
 
-  await loadMeals();
-}
+  // expose globally
+  window.loadMeals = loadMeals;
 
-window.addMeal = async function () {
-  const title = document.getElementById("title").value;
-  const desc = document.getElementById("desc").value;
-  const day = document.getElementById("day").value;
+  // =========================
+  // GROUP BY DAY
+  // =========================
 
-  await supabase.from("meals").insert({
-    id: crypto.randomUUID(),
-    title,
-    description: desc,
-    day
-  });
+  function groupMeals() {
 
-  title.value = "";
-  desc.value = "";
+    const grouped =
+      Object.fromEntries(
+        DAYS.map(day => [day, []])
+      );
 
-  await loadMeals();
-};
+    meals.forEach(meal => {
 
-window.deleteMeal = async function (id) {
-  await supabase.from("meals").delete().eq("id", id);
-  await loadMeals();
-};
+      if (grouped[meal.day]) {
+        grouped[meal.day].push(meal);
+      }
+    });
 
-loadMeals();
+    return grouped;
+  }
+
+  // =========================
+  // RENDER BOARD
+  // =========================
+
+  function render() {
+
+    const board =
+      document.getElementById("board");
+
+    board.innerHTML = "";
+
+    const grouped = groupMeals();
+
+    DAYS.forEach(day => {
+
+      const column =
+        document.createElement("div");
+
+      column.className = "day-column";
+
+      column.innerHTML = `
+        <h2>${day}</h2>
+        <div
+          class="meal-list"
+          data-day="${day}"
+        ></div>
+      `;
+
+      const list =
+        column.querySelector(".meal-list");
+
+      grouped[day].forEach(meal => {
+        list.appendChild(
+          createMealCard(meal)
+        );
+      });
+
+      addDropEvents(list);
+
+      board.appendChild(column);
+    });
+  }
+
+  // =========================
+  // CREATE CARD
+  // =========================
+
+  function createMealCard(meal) {
+
+    const card =
+      document.createElement("div");
+
+    card.className = "meal-card";
+    card.draggable = true;
+
+    card.dataset.id = meal.id;
+
+    card.innerHTML = `
+      <h3>${meal.title}</h3>
+
+      <p>
+        ${meal.description || ""}
+      </p>
+
+      <div class="card-actions">
+        <button
+          class="delete-btn"
+        >
+          Delete
+        </button>
+      </div>
+    `;
+
+    // desktop drag
+
+    card.addEventListener(
+      "dragstart",
+      () => {
+        card.classList.add("dragging");
+      }
+    );
+
+    card.addEventListener(
+      "dragend",
+      async () => {
+
+        card.classList.remove("dragging");
+
+        clearDropZones();
+
+        await syncDOMToSupabase();
+      }
+    );
+
+    // mobile touch drag
+
+    card.addEventListener(
+      "pointerdown",
+      e => {
+
+        card.setPointerCapture(
+          e.pointerId
+        );
+
+        card.classList.add("dragging");
+
+        function move(ev) {
+
+          const target =
+            document.elementFromPoint(
+              ev.clientX,
+              ev.clientY
+            );
+
+          const list =
+            target?.closest?.(".meal-list");
+
+          if (
+            list &&
+            list !== card.parentElement
+          ) {
+            list.appendChild(card);
+          }
+        }
+
+        async function up() {
+
+          card.classList.remove(
+            "dragging"
+          );
+
+          clearDropZones();
+
+          await syncDOMToSupabase();
+
+          card.removeEventListener(
+            "pointermove",
+            move
+          );
+
+          card.removeEventListener(
+            "pointerup",
+            up
+          );
+        }
+
+        card.addEventListener(
+          "pointermove",
+          move
+        );
+
+        card.addEventListener(
+          "pointerup",
+          up
+        );
+      }
+    );
+
+    // delete
+
+    card.querySelector(".delete-btn")
+      .addEventListener(
+        "click",
+        async () => {
+
+          await deleteMeal(meal.id);
+        }
+      );
+
+    return card;
+  }
+
+  // =========================
+  // DROP EVENTS
+  // =========================
+
+  function addDropEvents(container) {
+
+    container.addEventListener(
+      "dragover",
+      e => {
+
+        e.preventDefault();
+
+        clearDropZones();
+
+        container.classList.add(
+          "drop-zone"
+        );
+
+        const dragging =
+          document.querySelector(
+            ".dragging"
+          );
+
+        if (
+          dragging &&
+          dragging.parentNode !== container
+        ) {
+          container.appendChild(
+            dragging
+          );
+        }
+      }
+    );
+
+    container.addEventListener(
+      "drop",
+      async () => {
+
+        clearDropZones();
+
+        await syncDOMToSupabase();
+      }
+    );
+  }
+
+  function clearDropZones() {
+
+    document
+      .querySelectorAll(".meal-list")
+      .forEach(list => {
+        list.classList.remove(
+          "drop-zone"
+        );
+      });
+  }
+
+  // =========================
+  // SYNC DOM TO SUPABASE
+  // =========================
+
+  async function syncDOMToSupabase() {
+
+    const updates = [];
+
+    DAYS.forEach(day => {
+
+      const list =
+        document.querySelector(
+          `[data-day="${day}"]`
+        );
+
+      list
+        .querySelectorAll(".meal-card")
+        .forEach(card => {
+
+          updates.push({
+            id: card.dataset.id,
+            day
+          });
+        });
+    });
+
+    for (const update of updates) {
+
+      await supabase
+        .from("meals")
+        .update({
+          day: update.day
+        })
+        .eq("id", update.id);
+    }
+
+    await loadMeals();
+  }
+
+  // =========================
+  // ADD MEAL
+  // =========================
+
+  window.addMeal =
+    async function () {
+
+      const titleInput =
+        document.getElementById(
+          "title"
+        );
+
+      const descInput =
+        document.getElementById(
+          "desc"
+        );
+
+      const dayInput =
+        document.getElementById(
+          "day"
+        );
+
+      const title =
+        titleInput.value.trim();
+
+      const description =
+        descInput.value.trim();
+
+      const day =
+        dayInput.value;
+
+      if (!title) return;
+
+      const { error } =
+        await supabase
+          .from("meals")
+          .insert({
+            id: crypto.randomUUID(),
+            title,
+            description,
+            day
+          });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      titleInput.value = "";
+      descInput.value = "";
+
+      await loadMeals();
+    };
+
+  // =========================
+  // DELETE
+  // =========================
+
+  async function deleteMeal(id) {
+
+    const { error } =
+      await supabase
+        .from("meals")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    await loadMeals();
+  }
+
+  // =========================
+  // CLEAR ALL
+  // =========================
+
+  window.clearMeals =
+    async function () {
+
+      const ok =
+        confirm(
+          "Delete all meals?"
+        );
+
+      if (!ok) return;
+
+      const { error } =
+        await supabase
+          .from("meals")
+          .delete()
+          .neq("id", "");
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      await loadMeals();
+    };
+
+  // =========================
+  // INITIAL LOAD
+  // =========================
+
+  loadMeals();
+
 </script>
 
 </body>
