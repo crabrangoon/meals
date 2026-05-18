@@ -1,157 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Meal Planner</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Meal Planner</title>
 
-  <style>
+<style>
 
-    * {
-      box-sizing: border-box;
-    }
+* { box-sizing: border-box; }
 
-    :root {
-      --bg: #f5f7fb;
-      --text: #222;
-      --header: #2d3748;
-      --card: white;
-      --meal: #edf2ff;
-      --border: #ccc;
-      --drop: #dbeafe;
-      --button: #4f46e5;
-      --danger: #ef4444;
-    }
+:root {
+  --bg:#f5f7fb;
+  --text:#222;
+  --card:#fff;
+  --meal:#edf2ff;
+  --header:#2d3748;
+  --border:#ccc;
+  --drop:#dbeafe;
+  --btn:#4f46e5;
+  --danger:#ef4444;
+}
 
-    body.dark {
-      --bg: #111827;
-      --text: #f3f4f6;
-      --header: #030712;
-      --card: #1f2937;
-      --meal: #374151;
-      --border: #4b5563;
-      --drop: #1e40af;
-      --button: #6366f1;
-      --danger: #ef4444;
-    }
+body.dark {
+  --bg:#111827;
+  --text:#f3f4f6;
+  --card:#1f2937;
+  --meal:#374151;
+  --header:#030712;
+  --border:#4b5563;
+  --drop:#1e40af;
+  --btn:#6366f1;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      transition: background 0.25s ease, color 0.25s ease;
-    }
+body {
+  margin:0;
+  font-family:Arial;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    header {
-      background: var(--header);
-      color: white;
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+header {
+  background:var(--header);
+  color:#fff;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+}
 
-    h1 {
-      margin: 0;
-      font-size: 24px;
-    }
+button {
+  background:var(--btn);
+  color:#fff;
+  border:0;
+  padding:10px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
 
-    button {
-      border: none;
-      background: var(--button);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.danger { background:var(--danger); }
 
-    .danger {
-      background: var(--danger);
-    }
+.add-form {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:12px;
+  background:var(--card);
+}
 
-    .add-form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 14px;
-      background: var(--card);
-    }
+input,textarea,select {
+  padding:10px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+}
 
-    input, textarea, select {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-    }
+.board {
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
 
-    .board {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 14px;
-    }
+.day-column {
+  background:var(--card);
+  padding:12px;
+  border-radius:12px;
+}
 
-    .day-column {
-      background: var(--card);
-      border-radius: 14px;
-      padding: 12px;
-    }
+.meal-list {
+  min-height:60px;
+  padding:6px;
+}
 
-    .meal-list {
-      min-height: 60px;
-      padding: 6px;
-      border-radius: 10px;
-    }
+.drop-zone {
+  background:var(--drop);
+  border:2px dashed #60a5fa;
+}
 
-    .drop-zone {
-      background: var(--drop);
-      border: 2px dashed #60a5fa;
-    }
+.meal-card {
+  background:var(--meal);
+  border-left:5px solid #4f46e5;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  cursor:grab;
+  user-select:none;
+  touch-action:none;
+}
 
-    .meal-card {
-      border-left: 6px solid #4f46e5;
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
-      touch-action: none;
-      user-select: none;
-      cursor: grab;
-    }
+.meal-card.dragging { opacity:0.5; }
 
-    .meal-card.dragging {
-      opacity: 0.5;
-    }
+.card-actions {
+  display:flex;
+  justify-content:flex-end;
+}
 
-    .card-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 8px;
-    }
+.delete-btn {
+  background:var(--danger);
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:6px;
+}
 
-    .delete-btn {
-      background: var(--danger);
-      padding: 6px 10px;
-      font-size: 12px;
-      border-radius: 6px;
-      touch-action: manipulation;
-    }
-
-    @media (max-width: 600px) {
-      .add-form {
-        flex-direction: column;
-      }
-
-      input, textarea, select, button {
-        width: 100%;
-      }
-    }
-
-  </style>
+</style>
 </head>
 
 <body>
@@ -159,17 +132,16 @@
 <header>
   <h1>🍽️ Meal Planner</h1>
 
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <button id="themeBtn">🌙 Dark Mode</button>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button id="themeBtn">🌙 Dark</button>
     <button id="refreshBtn">Refresh</button>
-    <button class="danger" id="clearBtn">Clear All</button>
+    <button id="clearBtn" class="danger">Clear</button>
   </div>
 </header>
 
 <section class="add-form">
-
-  <input id="title" placeholder="Meal name"/>
-  <textarea id="desc" placeholder="Description"></textarea>
+  <input id="title" placeholder="Meal"/>
+  <textarea id="desc" placeholder="Desc"></textarea>
 
   <select id="day">
     <option>Monday</option>
@@ -181,16 +153,14 @@
     <option>Sunday</option>
   </select>
 
-  <button id="addBtn">Add Meal</button>
-
+  <button id="addBtn">Add</button>
 </section>
 
 <section id="board" class="board"></section>
 
 <script type="module">
 
-import { createClient }
-from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabase = createClient(
   "https://oztcdivlafckayzoensb.supabase.co",
@@ -201,153 +171,153 @@ const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sun
 
 let meals = [];
 
-// ---------- COLOR SYSTEM ----------
-function getCardColor(id) {
-  const colors = [
-    "#fee2e2","#ffedd5","#fef9c3",
-    "#dcfce7","#dbeafe","#e0e7ff","#fce7f3"
-  ];
-
-  let hash = 0;
-  for (let i=0;i<id.length;i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-}
-
 // ---------- LOAD ----------
 async function loadMeals() {
-  const { data, error } = await supabase
+
+  const { data } = await supabase
     .from("meals")
     .select("*")
-    .order("created_at");
-
-  if (error) return console.error(error);
+    .order("day")
+    .order("position");
 
   meals = data || [];
   render();
 }
 
 // ---------- GROUP ----------
-function groupMeals() {
-  const grouped = Object.fromEntries(DAYS.map(d => [d, []]));
-  meals.forEach(m => grouped[m.day]?.push(m));
-  return grouped;
+function group() {
+  const g = Object.fromEntries(DAYS.map(d => [d, []]));
+  meals.forEach(m => g[m.day]?.push(m));
+  return g;
+}
+
+// ---------- COLOR ----------
+function color(id) {
+  const c = ["#fee2e2","#ffedd5","#fef9c3","#dcfce7","#dbeafe","#e0e7ff","#fce7f3"];
+  let h = 0;
+  for (let i=0;i<id.length;i++) h = id.charCodeAt(i) + ((h<<5)-h);
+  return c[Math.abs(h)%c.length];
 }
 
 // ---------- RENDER ----------
 function render() {
+
   const board = document.getElementById("board");
   board.innerHTML = "";
 
-  const grouped = groupMeals();
+  const grouped = group();
 
   DAYS.forEach(day => {
 
-    const column = document.createElement("div");
-    column.className = "day-column";
+    const col = document.createElement("div");
+    col.className = "day-column";
 
-    column.innerHTML = `
+    col.innerHTML = `
       <h2>${day}</h2>
       <div class="meal-list" data-day="${day}"></div>
     `;
 
-    const list = column.querySelector(".meal-list");
+    const list = col.querySelector(".meal-list");
 
-    grouped[day].forEach(meal => {
-      list.appendChild(createCard(meal));
+    grouped[day].forEach(m => {
+      list.appendChild(card(m));
     });
 
-    addDrop(list);
-    board.appendChild(column);
+    drop(list);
+    board.appendChild(col);
   });
 }
 
 // ---------- CARD ----------
-function createCard(meal) {
+function card(m) {
 
-  const card = document.createElement("div");
-  card.className = "meal-card";
-  card.draggable = true;
-  card.dataset.id = meal.id;
+  const el = document.createElement("div");
+  el.className = "meal-card";
+  el.dataset.id = m.id;
+  el.draggable = true;
 
-  card.style.background =
-    bodyDark()
+  el.style.background =
+    document.body.classList.contains("dark")
       ? "#374151"
-      : getCardColor(meal.id);
+      : color(m.id);
 
-  card.innerHTML = `
-    <h3>${meal.title}</h3>
-    <p>${meal.description || ""}</p>
+  el.innerHTML = `
+    <h3>${m.title}</h3>
+    <p>${m.description || ""}</p>
     <div class="card-actions">
       <button class="delete-btn">Delete</button>
     </div>
   `;
 
-  card.addEventListener("dragstart", () => {
-    card.classList.add("dragging");
-  });
-
-  card.addEventListener("dragend", async () => {
-    card.classList.remove("dragging");
+  // drag start
+  el.addEventListener("dragstart", () => el.classList.add("dragging"));
+  el.addEventListener("dragend", async () => {
+    el.classList.remove("dragging");
     clearDrop();
     await sync();
   });
 
-  card.addEventListener("pointerdown", e => {
+  // touch drag + reorder
+  el.addEventListener("pointerdown", e => {
 
     if (e.target.closest(".delete-btn")) return;
 
-    card.setPointerCapture(e.pointerId);
-    card.classList.add("dragging");
+    el.setPointerCapture(e.pointerId);
+    el.classList.add("dragging");
 
     function move(ev) {
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
-      const list = el?.closest?.(".meal-list");
-      if (list && list !== card.parentElement) {
-        list.appendChild(card);
-      }
+
+      const target = document.elementFromPoint(ev.clientX, ev.clientY);
+      const list = target?.closest?.(".meal-list");
+
+      if (!list) return;
+
+      const cards = [...list.querySelectorAll(".meal-card")].filter(c => c !== el);
+
+      const after = cards.find(c => {
+        const r = c.getBoundingClientRect();
+        return ev.clientY < r.top + r.height/2;
+      });
+
+      if (!after) list.appendChild(el);
+      else list.insertBefore(el, after);
     }
 
     async function up() {
-      card.classList.remove("dragging");
+      el.classList.remove("dragging");
       clearDrop();
       await sync();
 
-      card.removeEventListener("pointermove", move);
-      card.removeEventListener("pointerup", up);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
     }
 
-    card.addEventListener("pointermove", move);
-    card.addEventListener("pointerup", up);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
   });
 
-  card.querySelector(".delete-btn").addEventListener("click", async (e) => {
+  el.querySelector(".delete-btn").onclick = async e => {
     e.stopPropagation();
-    await deleteMeal(meal.id);
-  });
+    await supabase.from("meals").delete().eq("id", m.id);
+    await loadMeals();
+  };
 
-  return card;
+  return el;
 }
 
 // ---------- DROP ----------
-function addDrop(list) {
-  list.addEventListener("dragover", e => {
+function drop(list) {
+
+  list.ondragover = e => {
     e.preventDefault();
     clearDrop();
     list.classList.add("drop-zone");
+  };
 
-    const dragging = document.querySelector(".dragging");
-    if (dragging && dragging.parentNode !== list) {
-      list.appendChild(dragging);
-    }
-  });
-
-  list.addEventListener("drop", async () => {
+  list.ondrop = async () => {
     clearDrop();
     await sync();
-  });
+  };
 }
 
 function clearDrop() {
@@ -355,26 +325,30 @@ function clearDrop() {
     .forEach(l => l.classList.remove("drop-zone"));
 }
 
-// ---------- SYNC ----------
+// ---------- SYNC ORDER ----------
 async function sync() {
 
   const updates = [];
 
   DAYS.forEach(day => {
-    const list = document.querySelector(`[data-day="${day}"]`);
 
-    list.querySelectorAll(".meal-card").forEach(card => {
+    const list = document.querySelector(`[data-day="${day}"]`);
+    const cards = [...list.querySelectorAll(".meal-card")];
+
+    cards.forEach((c, i) => {
       updates.push({
-        id: card.dataset.id,
-        day
+        id: c.dataset.id,
+        day,
+        position: i
       });
     });
+
   });
 
   for (const u of updates) {
     await supabase
       .from("meals")
-      .update({ day: u.day })
+      .update({ day: u.day, position: u.position })
       .eq("id", u.id);
   }
 
@@ -382,11 +356,11 @@ async function sync() {
 }
 
 // ---------- ADD ----------
-async function addMeal() {
+async function add() {
 
-  const title = titleEl.value.trim();
-  const desc = descEl.value.trim();
-  const day = dayEl.value;
+  const title = t.value.trim();
+  const desc = d.value.trim();
+  const day = daySel.value;
 
   if (!title) return;
 
@@ -394,74 +368,52 @@ async function addMeal() {
     id: crypto.randomUUID(),
     title,
     description: desc,
-    day
+    day,
+    position: 0
   });
 
-  titleEl.value = "";
-  descEl.value = "";
+  t.value = "";
+  d.value = "";
 
   await loadMeals();
 }
 
-// ---------- DELETE ----------
-async function deleteMeal(id) {
-
-  await supabase
-    .from("meals")
-    .delete()
-    .eq("id", id);
-
-  meals = meals.filter(m => m.id !== id);
-  render();
-}
-
 // ---------- CLEAR ----------
-async function clearMeals() {
+async function clearAll() {
 
-  const ok = confirm("Delete all meals?");
-  if (!ok) return;
+  if (!confirm("Delete all?")) return;
 
-  await supabase
-    .from("meals")
-    .delete()
-    .not("id","is",null);
+  await supabase.from("meals").delete().not("id","is",null);
 
   meals = [];
   render();
 }
 
-// ---------- DARK MODE ----------
-function bodyDark() {
-  return document.body.classList.contains("dark");
-}
-
+// ---------- THEME ----------
 function toggleTheme() {
-  const dark = bodyDark();
-  document.body.classList.toggle("dark", !dark);
-  localStorage.setItem("theme", !dark ? "dark" : "light");
-  applyTheme();
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
 }
 
-function applyTheme() {
-  const t = localStorage.getItem("theme") || "light";
-  document.body.classList.toggle("dark", t === "dark");
+function loadTheme() {
+  const t = localStorage.getItem("theme");
+  if (t === "dark") document.body.classList.add("dark");
 }
 
-// ---------- BUTTONS ----------
-const titleEl = document.getElementById("title");
-const descEl = document.getElementById("desc");
-const dayEl = document.getElementById("day");
+// ---------- UI ----------
+const t = document.getElementById("title");
+const d = document.getElementById("desc");
+const daySel = document.getElementById("day");
 
-document.getElementById("addBtn").addEventListener("click", addMeal);
-document.getElementById("refreshBtn").addEventListener("click", loadMeals);
-document.getElementById("clearBtn").addEventListener("click", clearMeals);
-document.getElementById("themeBtn").addEventListener("click", toggleTheme);
+document.getElementById("addBtn").onclick = add;
+document.getElementById("refreshBtn").onclick = loadMeals;
+document.getElementById("clearBtn").onclick = clearAll;
+document.getElementById("themeBtn").onclick = toggleTheme;
 
 // ---------- INIT ----------
-applyTheme();
+loadTheme();
 loadMeals();
 
 </script>
-
 </body>
 </html>
