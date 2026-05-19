@@ -174,8 +174,10 @@ header h1{
   padding:10px 14px;
   border-radius:999px;
   font-size:0.85rem;
+
   opacity:0;
   transform:translateY(10px);
+
   transition:all 0.25s ease;
 }
 
@@ -212,7 +214,12 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbmd5cXZ4cmlscnNxeXpoaGRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzE3MTYsImV4cCI6MjA5NDcwNzcxNn0.P6lTSXcaOHmTvHQEUXMGwDduyXjhDm41iPQSAGNO9rc";
 
-const supabase =
+
+/* IMPORTANT:
+   USE "db" NOT "supabase"
+*/
+
+const db =
   window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
@@ -240,13 +247,16 @@ const mealTypes=[
 
 let plannerData={};
 
-const board=document.getElementById("board");
-const statusEl=document.getElementById("status");
+const board=
+  document.getElementById("board");
+
+const statusEl=
+  document.getElementById("status");
 
 let dragged=null;
 
 /* =========================
-   STATUS TOAST
+   STATUS MESSAGE
 ========================= */
 
 function showStatus(message){
@@ -270,16 +280,20 @@ function showStatus(message){
 
 async function init(){
 
+  /* ENSURE DAYS EXIST */
+
   days.forEach(day=>{
 
     plannerData[day]=[];
 
   });
 
+  /* LOAD DATABASE */
+
   const {
     data,
     error
-  } = await supabase
+  } = await db
     .from("meal_planner")
     .select("*")
     .order("position");
@@ -292,6 +306,8 @@ async function init(){
 
     return;
   }
+
+  /* GROUP BY DAY */
 
   data.forEach(row=>{
 
@@ -332,7 +348,7 @@ async function save(day){
 
   const {
     error:deleteError
-  } = await supabase
+  } = await db
     .from("meal_planner")
     .delete()
     .eq("day",day);
@@ -346,24 +362,27 @@ async function save(day){
     return;
   }
 
+  /* CREATE NEW ROWS */
+
+  const rows=
+    plannerData[day].map(card=>({
+
+      day:day,
+
+      meal_type:card.type,
+
+      meal_text:card.text,
+
+      position:card.position
+    }));
+
   /* INSERT NEW ROWS */
-
-  const rows=plannerData[day].map(card=>({
-
-    day:day,
-
-    meal_type:card.type,
-
-    meal_text:card.text,
-
-    position:card.position
-  }));
 
   if(rows.length){
 
     const {
       error:insertError
-    } = await supabase
+    } = await db
       .from("meal_planner")
       .insert(rows);
 
@@ -381,7 +400,7 @@ async function save(day){
 }
 
 /* =========================
-   CARD
+   CREATE CARD
 ========================= */
 
 function createCard(data,day){
@@ -395,7 +414,9 @@ function createCard(data,day){
   card.innerHTML=`
     <div class="card-top">
 
-      <select class="meal-type meal-${data.type.toLowerCase()}">
+      <select
+        class="meal-type meal-${data.type.toLowerCase()}"
+      >
 
         ${mealTypes.map(t=>`
 
@@ -458,7 +479,7 @@ function createCard(data,day){
     save(day);
   };
 
-  /* DESKTOP DRAG */
+  /* DESKTOP DRAG START */
 
   card.addEventListener(
     "dragstart",
@@ -467,6 +488,8 @@ function createCard(data,day){
       card.classList.add("dragging");
     }
   );
+
+  /* DESKTOP DRAG END */
 
   card.addEventListener(
     "dragend",
@@ -522,7 +545,7 @@ function build(){
       );
     });
 
-    /* ADD CARD */
+    /* ADD NEW CARD */
 
     col.querySelector(".add-btn")
       .onclick=()=>{
@@ -641,6 +664,8 @@ document.addEventListener(
     if(!dragged) return;
 
     dragged.classList.remove("dragging");
+
+    /* SAVE ALL DAYS */
 
     days.forEach(d=>save(d));
 
