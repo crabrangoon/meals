@@ -1,466 +1,706 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Meal Planner</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <style>
+<title>Meal Planner</title>
 
-    * {
-      box-sizing: border-box;
-    }
+<style>
+:root{
+  --card:#fff;
+  --primary:#2563eb;
+  --danger:#ef4444;
+  --text:#1f2937;
+  --shadow:0 4px 10px rgba(0,0,0,0.08);
+  --radius:18px;
+}
 
-    :root {
-      --bg: #f5f7fb;
-      --text: #222;
-      --header: #2d3748;
-      --card: white;
-      --meal: #edf2ff;
-      --border: #ccc;
-      --drop: #dbeafe;
-      --button: #4f46e5;
-      --danger: #ef4444;
-    }
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-    body.dark {
-      --bg: #111827;
-      --text: #f3f4f6;
-      --header: #030712;
-      --card: #1f2937;
-      --meal: #374151;
-      --border: #4b5563;
-      --drop: #1e40af;
-      --button: #6366f1;
-      --danger: #ef4444;
-    }
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:#f4f7fb;
+  user-select:none;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      transition: background 0.25s ease, color 0.25s ease;
-    }
+/* DAY COLORS */
+.day-monday{ background:#e0f2fe; }
+.day-tuesday{ background:#ecfccb; }
+.day-wednesday{ background:#fef9c3; }
+.day-thursday{ background:#ede9fe; }
+.day-friday{ background:#ffe4e6; }
+.day-saturday{ background:#ffedd5; }
+.day-sunday{ background:#f1f5f9; }
 
-    header {
-      background: var(--header);
-      color: white;
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+header{
+  position:sticky;
+  top:0;
+  background:linear-gradient(135deg,#0ea5e9,#2563eb);
+  color:white;
+  padding:16px;
+  z-index:100;
+}
 
-    h1 {
-      margin: 0;
-      font-size: 24px;
-    }
+header h1{
+  margin:0;
+}
 
-    button {
-      border: none;
-      background: var(--button);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+#board{
+  max-width:850px;
+  margin:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
 
-    .danger {
-      background: var(--danger);
-    }
+.column{
+  border-radius:var(--radius);
+  padding:12px;
+  box-shadow:var(--shadow);
+}
 
-    .add-form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 14px;
-      background: var(--card);
-    }
+.card-list{
+  min-height:50px;
+}
 
-    input, textarea, select {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-    }
+/* CARD */
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  cursor:grab;
 
-    .board {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 14px;
-    }
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 
-    .day-column {
-      background: var(--card);
-      border-radius: 14px;
-      padding: 12px;
-    }
+  touch-action:none;
+}
 
-    .meal-list {
-      min-height: 60px;
-      padding: 6px;
-      border-radius: 10px;
-    }
+.card.dragging{
+  opacity:0.7;
+  transform:scale(1.03);
+  box-shadow:0 12px 25px rgba(0,0,0,0.15);
+}
 
-    .drop-zone {
-      background: var(--drop);
-      border: 2px dashed #60a5fa;
-    }
+/* TOP ROW */
+.card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  gap:10px;
+}
 
-    .meal-card {
-      border-left: 6px solid #4f46e5;
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
-      touch-action: none;
-      user-select: none;
-      cursor: grab;
-    }
+/* MEAL TYPE */
+.meal-type{
+  border:none;
+  border-radius:999px;
+  padding:6px 10px;
+  font-weight:700;
+  font-size:0.8rem;
+}
 
-    .meal-card.dragging {
-      opacity: 0.5;
-    }
+.meal-breakfast{
+  background:#fef3c7;
+  color:#92400e;
+}
 
-    .card-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 8px;
-    }
+.meal-lunch{
+  background:#dbeafe;
+  color:#1d4ed8;
+}
 
-    .delete-btn {
-      background: var(--danger);
-      padding: 6px 10px;
-      font-size: 12px;
-      border-radius: 6px;
-      touch-action: manipulation;
-    }
+.meal-dinner{
+  background:#fee2e2;
+  color:#991b1b;
+}
 
-    @media (max-width: 600px) {
-      .add-form {
-        flex-direction: column;
-      }
+/* DELETE BUTTON */
+.delete-btn{
+  background:transparent;
+  border:none;
+  color:var(--danger);
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  min-width:40px;
+  min-height:40px;
+  border-radius:10px;
+}
 
-      input, textarea, select, button {
-        width: 100%;
-      }
-    }
+.delete-btn:active{
+  transform:scale(0.9);
+}
 
-  </style>
+/* CONTENT */
+.content{
+  min-height:40px;
+  outline:none;
+  user-select:text;
+}
+
+/* ADD BUTTON */
+.add-btn{
+  width:100%;
+  padding:12px;
+  background:var(--primary);
+  color:white;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.add-btn:active{
+  transform:scale(0.98);
+}
+
+/* STATUS */
+.status{
+  position:fixed;
+  bottom:16px;
+  right:16px;
+  background:#111827;
+  color:white;
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:0.85rem;
+  opacity:0;
+  transform:translateY(10px);
+  transition:all 0.25s ease;
+}
+
+.status.show{
+  opacity:1;
+  transform:translateY(0);
+}
+</style>
 </head>
 
 <body>
 
 <header>
   <h1>🍽️ Meal Planner</h1>
-
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <button id="themeBtn">🌙 Dark Mode</button>
-    <button id="refreshBtn">Refresh</button>
-    <button class="danger" id="clearBtn">Clear All</button>
-  </div>
 </header>
 
-<section class="add-form">
+<main id="board"></main>
 
-  <input id="title" placeholder="Meal name"/>
-  <textarea id="desc" placeholder="Description"></textarea>
+<div id="status" class="status">
+  Saved
+</div>
 
-  <select id="day">
-    <option>Monday</option>
-    <option>Tuesday</option>
-    <option>Wednesday</option>
-    <option>Thursday</option>
-    <option>Friday</option>
-    <option>Saturday</option>
-    <option>Sunday</option>
-  </select>
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <button id="addBtn">Add Meal</button>
+<script>
+/* =========================
+   SUPABASE CONFIG
+========================= */
 
-</section>
+const SUPABASE_URL =
+  "https://njngyqvxrilrsqyzhhds.supabase.co";
 
-<section id="board" class="board"></section>
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbmd5cXZ4cmlscnNxeXpoaGRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzE3MTYsImV4cCI6MjA5NDcwNzcxNn0.P6lTSXcaOHmTvHQEUXMGwDduyXjhDm41iPQSAGNO9rc";
 
-<script type="module">
+const supabase =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-import { createClient }
-from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+/* =========================
+   DATA
+========================= */
 
-const supabase = createClient(
-  "https://oztcdivlafckayzoensb.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96dGNkaXZsYWZja2F5em9lbnNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwOTA1ODIsImV4cCI6MjA5NDY2NjU4Mn0.5SOpvBqBSuGDdqd8xsD3ocKZtPV5fwwtvJ0yfwW0viU"
-);
+const days=[
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday"
+];
 
-const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const mealTypes=[
+  "Breakfast",
+  "Lunch",
+  "Dinner"
+];
 
-let meals = [];
+let plannerData={};
 
-// ---------- COLOR SYSTEM ----------
-function getCardColor(id) {
-  const colors = [
-    "#fee2e2","#ffedd5","#fef9c3",
-    "#dcfce7","#dbeafe","#e0e7ff","#fce7f3"
-  ];
+const board=document.getElementById("board");
+const statusEl=document.getElementById("status");
 
-  let hash = 0;
-  for (let i=0;i<id.length;i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+let dragged=null;
+
+/* =========================
+   STATUS TOAST
+========================= */
+
+function showStatus(message){
+
+  statusEl.textContent=message;
+
+  statusEl.classList.add("show");
+
+  clearTimeout(statusEl.timer);
+
+  statusEl.timer=setTimeout(()=>{
+
+    statusEl.classList.remove("show");
+
+  },1500);
+}
+
+/* =========================
+   LOAD FROM SUPABASE
+========================= */
+
+async function init(){
+
+  days.forEach(day=>{
+
+    plannerData[day]=[];
+
+  });
+
+  const {
+    data,
+    error
+  } = await supabase
+    .from("meal_planner")
+    .select("*")
+    .order("position");
+
+  if(error){
+
+    console.error(error);
+
+    showStatus("Load failed");
+
+    return;
   }
 
-  return colors[Math.abs(hash) % colors.length];
-}
+  data.forEach(row=>{
 
-// ---------- LOAD ----------
-async function loadMeals() {
-  const { data, error } = await supabase
-    .from("meals")
-    .select("*")
-    .order("created_at");
+    plannerData[row.day].push({
 
-  if (error) return console.error(error);
+      type:row.meal_type,
 
-  meals = data || [];
-  render();
-}
-
-// ---------- GROUP ----------
-function groupMeals() {
-  const grouped = Object.fromEntries(DAYS.map(d => [d, []]));
-  meals.forEach(m => grouped[m.day]?.push(m));
-  return grouped;
-}
-
-// ---------- RENDER ----------
-function render() {
-  const board = document.getElementById("board");
-  board.innerHTML = "";
-
-  const grouped = groupMeals();
-
-  DAYS.forEach(day => {
-
-    const column = document.createElement("div");
-    column.className = "day-column";
-
-    column.innerHTML = `
-      <h2>${day}</h2>
-      <div class="meal-list" data-day="${day}"></div>
-    `;
-
-    const list = column.querySelector(".meal-list");
-
-    grouped[day].forEach(meal => {
-      list.appendChild(createCard(meal));
+      text:row.meal_text
     });
 
-    addDrop(list);
-    board.appendChild(column);
   });
 }
 
-// ---------- CARD ----------
-function createCard(meal) {
+/* =========================
+   SAVE TO SUPABASE
+========================= */
 
-  const card = document.createElement("div");
-  card.className = "meal-card";
-  card.draggable = true;
-  card.dataset.id = meal.id;
+async function save(day){
 
-  card.style.background =
-    bodyDark()
-      ? "#374151"
-      : getCardColor(meal.id);
+  const col=document.querySelector(
+    `[data-day="${day}"] .card-list`
+  );
 
-  card.innerHTML = `
-    <h3>${meal.title}</h3>
-    <p>${meal.description || ""}</p>
-    <div class="card-actions">
-      <button class="delete-btn">Delete</button>
+  plannerData[day]=[
+    ...col.querySelectorAll(".card")
+  ].map((c,index)=>({
+
+    type:c.querySelector("select").value,
+
+    text:c.querySelector(".content")
+      .innerText
+      .trim(),
+
+    position:index
+  }));
+
+  /* DELETE OLD ROWS */
+
+  const {
+    error:deleteError
+  } = await supabase
+    .from("meal_planner")
+    .delete()
+    .eq("day",day);
+
+  if(deleteError){
+
+    console.error(deleteError);
+
+    showStatus("Save failed");
+
+    return;
+  }
+
+  /* INSERT NEW ROWS */
+
+  const rows=plannerData[day].map(card=>({
+
+    day:day,
+
+    meal_type:card.type,
+
+    meal_text:card.text,
+
+    position:card.position
+  }));
+
+  if(rows.length){
+
+    const {
+      error:insertError
+    } = await supabase
+      .from("meal_planner")
+      .insert(rows);
+
+    if(insertError){
+
+      console.error(insertError);
+
+      showStatus("Save failed");
+
+      return;
+    }
+  }
+
+  showStatus("Saved");
+}
+
+/* =========================
+   CARD
+========================= */
+
+function createCard(data,day){
+
+  const card=document.createElement("div");
+
+  card.className="card";
+
+  card.draggable=true;
+
+  card.innerHTML=`
+    <div class="card-top">
+
+      <select class="meal-type meal-${data.type.toLowerCase()}">
+
+        ${mealTypes.map(t=>`
+
+          <option
+            ${t===data.type ? "selected" : ""}
+          >
+            ${t}
+          </option>
+
+        `).join("")}
+
+      </select>
+
+      <button class="delete-btn">
+        ✕
+      </button>
+
+    </div>
+
+    <div
+      class="content"
+      contenteditable="true"
+    >
+      ${data.text}
     </div>
   `;
 
-  card.addEventListener("dragstart", () => {
-    card.classList.add("dragging");
-  });
+  const select=
+    card.querySelector("select");
 
-  card.addEventListener("dragend", async () => {
-    card.classList.remove("dragging");
-    clearDrop();
-    await sync();
-  });
+  const content=
+    card.querySelector(".content");
 
-  card.addEventListener("pointerdown", e => {
+  const del=
+    card.querySelector(".delete-btn");
 
-    if (e.target.closest(".delete-btn")) return;
+  /* TYPE CHANGE */
 
-    card.setPointerCapture(e.pointerId);
-    card.classList.add("dragging");
+  select.onchange=()=>{
 
-    function move(ev) {
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
-      const list = el?.closest?.(".meal-list");
-      if (list && list !== card.parentElement) {
-        list.appendChild(card);
-      }
+    select.className=
+      `meal-type meal-${select.value.toLowerCase()}`;
+
+    save(day);
+  };
+
+  /* TEXT CHANGE */
+
+  content.oninput=()=>{
+
+    save(day);
+  };
+
+  /* DELETE */
+
+  del.onclick=()=>{
+
+    card.remove();
+
+    save(day);
+  };
+
+  /* DESKTOP DRAG */
+
+  card.addEventListener(
+    "dragstart",
+    ()=>{
+
+      card.classList.add("dragging");
     }
+  );
 
-    async function up() {
+  card.addEventListener(
+    "dragend",
+    ()=>{
+
       card.classList.remove("dragging");
-      clearDrop();
-      await sync();
 
-      card.removeEventListener("pointermove", move);
-      card.removeEventListener("pointerup", up);
+      /* SAVE ALL DAYS */
+
+      days.forEach(d=>save(d));
     }
-
-    card.addEventListener("pointermove", move);
-    card.addEventListener("pointerup", up);
-  });
-
-  card.querySelector(".delete-btn").addEventListener("click", async (e) => {
-    e.stopPropagation();
-    await deleteMeal(meal.id);
-  });
+  );
 
   return card;
 }
 
-// ---------- DROP ----------
-function addDrop(list) {
-  list.addEventListener("dragover", e => {
-    e.preventDefault();
-    clearDrop();
-    list.classList.add("drop-zone");
+/* =========================
+   BUILD UI
+========================= */
 
-    const dragging = document.querySelector(".dragging");
-    if (dragging && dragging.parentNode !== list) {
-      list.appendChild(dragging);
-    }
-  });
+function build(){
 
-  list.addEventListener("drop", async () => {
-    clearDrop();
-    await sync();
-  });
-}
+  board.innerHTML="";
 
-function clearDrop() {
-  document.querySelectorAll(".meal-list")
-    .forEach(l => l.classList.remove("drop-zone"));
-}
+  days.forEach(day=>{
 
-// ---------- SYNC ----------
-async function sync() {
+    const col=document.createElement("div");
 
-  const updates = [];
+    col.className=
+      `column day-${day.toLowerCase()}`;
 
-  DAYS.forEach(day => {
-    const list = document.querySelector(`[data-day="${day}"]`);
+    col.dataset.day=day;
 
-    list.querySelectorAll(".meal-card").forEach(card => {
-      updates.push({
-        id: card.dataset.id,
-        day
-      });
+    col.innerHTML=`
+      <h2>${day}</h2>
+
+      <div class="card-list"></div>
+
+      <button class="add-btn">
+        + Add Meal
+      </button>
+    `;
+
+    const list=
+      col.querySelector(".card-list");
+
+    /* LOAD SAVED CARDS */
+
+    plannerData[day].forEach(card=>{
+
+      list.appendChild(
+        createCard(card,day)
+      );
     });
-  });
 
-  for (const u of updates) {
-    await supabase
-      .from("meals")
-      .update({ day: u.day })
-      .eq("id", u.id);
+    /* ADD CARD */
+
+    col.querySelector(".add-btn")
+      .onclick=()=>{
+
+      list.appendChild(
+
+        createCard(
+          {
+            type:"Dinner",
+            text:""
+          },
+          day
+        )
+      );
+
+      save(day);
+    };
+
+    /* DESKTOP DROP */
+
+    col.addEventListener(
+      "dragover",
+      e=>{
+
+        e.preventDefault();
+
+        const drag=
+          document.querySelector(".dragging");
+
+        if(!drag) return;
+
+        const after=
+          getAfter(list,e.clientY);
+
+        if(after==null){
+
+          list.appendChild(drag);
+
+        }else{
+
+          list.insertBefore(
+            drag,
+            after
+          );
+        }
+      }
+    );
+
+    board.appendChild(col);
+  });
+}
+
+/* =========================
+   TOUCH DRAGGING
+========================= */
+
+document.addEventListener(
+  "touchstart",
+  e=>{
+
+    const card=
+      e.target.closest(".card");
+
+    if(!card) return;
+
+    dragged=card;
+
+    card.classList.add("dragging");
+
+  },
+  {passive:true}
+);
+
+document.addEventListener(
+  "touchmove",
+  e=>{
+
+    if(!dragged) return;
+
+    const t=e.touches[0];
+
+    const el=
+      document.elementFromPoint(
+        t.clientX,
+        t.clientY
+      );
+
+    const list=
+      el?.closest(".card-list");
+
+    if(!list) return;
+
+    const after=
+      getAfter(list,t.clientY);
+
+    if(after==null){
+
+      list.appendChild(dragged);
+
+    }else{
+
+      list.insertBefore(
+        dragged,
+        after
+      );
+    }
+
+  },
+  {passive:true}
+);
+
+document.addEventListener(
+  "touchend",
+  ()=>{
+
+    if(!dragged) return;
+
+    dragged.classList.remove("dragging");
+
+    days.forEach(d=>save(d));
+
+    dragged=null;
   }
+);
 
-  await loadMeals();
+/* =========================
+   REORDER HELPER
+========================= */
+
+function getAfter(container,y){
+
+  const cards=[
+    ...container.querySelectorAll(
+      ".card:not(.dragging)"
+    )
+  ];
+
+  return cards.reduce(
+
+    (closest,child)=>{
+
+      const box=
+        child.getBoundingClientRect();
+
+      const offset=
+        y-box.top-box.height/2;
+
+      if(
+        offset<0 &&
+        offset>closest.offset
+      ){
+
+        return {
+          offset,
+          element:child
+        };
+      }
+
+      return closest;
+
+    },
+
+    {offset:-Infinity}
+
+  ).element;
 }
 
-// ---------- ADD ----------
-async function addMeal() {
+/* =========================
+   START APP
+========================= */
 
-  const title = titleEl.value.trim();
-  const desc = descEl.value.trim();
-  const day = dayEl.value;
+(async ()=>{
 
-  if (!title) return;
+  await init();
 
-  await supabase.from("meals").insert({
-    id: crypto.randomUUID(),
-    title,
-    description: desc,
-    day
-  });
+  build();
 
-  titleEl.value = "";
-  descEl.value = "";
-
-  await loadMeals();
-}
-
-// ---------- DELETE ----------
-async function deleteMeal(id) {
-
-  await supabase
-    .from("meals")
-    .delete()
-    .eq("id", id);
-
-  meals = meals.filter(m => m.id !== id);
-  render();
-}
-
-// ---------- CLEAR ----------
-async function clearMeals() {
-
-  const ok = confirm("Delete all meals?");
-  if (!ok) return;
-
-  await supabase
-    .from("meals")
-    .delete()
-    .not("id","is",null);
-
-  meals = [];
-  render();
-}
-
-// ---------- DARK MODE ----------
-function bodyDark() {
-  return document.body.classList.contains("dark");
-}
-
-function toggleTheme() {
-  const dark = bodyDark();
-  document.body.classList.toggle("dark", !dark);
-  localStorage.setItem("theme", !dark ? "dark" : "light");
-  applyTheme();
-}
-
-function applyTheme() {
-  const t = localStorage.getItem("theme") || "light";
-  document.body.classList.toggle("dark", t === "dark");
-}
-
-// ---------- BUTTONS ----------
-const titleEl = document.getElementById("title");
-const descEl = document.getElementById("desc");
-const dayEl = document.getElementById("day");
-
-document.getElementById("addBtn").addEventListener("click", addMeal);
-document.getElementById("refreshBtn").addEventListener("click", loadMeals);
-document.getElementById("clearBtn").addEventListener("click", clearMeals);
-document.getElementById("themeBtn").addEventListener("click", toggleTheme);
-
-// ---------- INIT ----------
-applyTheme();
-loadMeals();
-
+})();
 </script>
 
 </body>
