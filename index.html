@@ -46,9 +46,7 @@ header{
   z-index:100;
 }
 
-header h1{
-  margin:0;
-}
+header h1{ margin:0; }
 
 #board{
   max-width:850px;
@@ -65,11 +63,8 @@ header h1{
   box-shadow:var(--shadow);
 }
 
-.card-list{
-  min-height:50px;
-}
+.card-list{ min-height:50px; }
 
-/* CARD */
 .card{
   background:#fff;
   border-radius:14px;
@@ -77,11 +72,7 @@ header h1{
   margin-bottom:10px;
   box-shadow:0 2px 8px rgba(0,0,0,0.06);
   cursor:grab;
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
   touch-action:none;
 }
 
@@ -91,7 +82,6 @@ header h1{
   box-shadow:0 12px 25px rgba(0,0,0,0.15);
 }
 
-/* TOP ROW */
 .card-top{
   display:flex;
   justify-content:space-between;
@@ -100,7 +90,6 @@ header h1{
   gap:10px;
 }
 
-/* MEAL TYPE */
 .meal-type{
   border:none;
   border-radius:999px;
@@ -109,22 +98,10 @@ header h1{
   font-size:0.8rem;
 }
 
-.meal-breakfast{
-  background:#fef3c7;
-  color:#92400e;
-}
+.meal-breakfast{ background:#fef3c7; color:#92400e; }
+.meal-lunch{ background:#dbeafe; color:#1d4ed8; }
+.meal-dinner{ background:#fee2e2; color:#991b1b; }
 
-.meal-lunch{
-  background:#dbeafe;
-  color:#1d4ed8;
-}
-
-.meal-dinner{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-/* DELETE BUTTON */
 .delete-btn{
   background:transparent;
   border:none;
@@ -137,18 +114,14 @@ header h1{
   border-radius:10px;
 }
 
-.delete-btn:active{
-  transform:scale(0.9);
-}
+.delete-btn:active{ transform:scale(0.9); }
 
-/* CONTENT */
 .content{
   min-height:40px;
   outline:none;
   user-select:text;
 }
 
-/* ADD BUTTON */
 .add-btn{
   width:100%;
   padding:12px;
@@ -160,11 +133,8 @@ header h1{
   font-weight:600;
 }
 
-.add-btn:active{
-  transform:scale(0.98);
-}
+.add-btn:active{ transform:scale(0.98); }
 
-/* STATUS */
 .status{
   position:fixed;
   bottom:16px;
@@ -174,10 +144,8 @@ header h1{
   padding:10px 14px;
   border-radius:999px;
   font-size:0.85rem;
-
   opacity:0;
   transform:translateY(10px);
-
   transition:all 0.25s ease;
 }
 
@@ -196,11 +164,8 @@ header h1{
 
 <main id="board"></main>
 
-<div id="status" class="status">
-  Saved
-</div>
+<div id="status" class="status">Saved</div>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -208,70 +173,47 @@ header h1{
    SUPABASE CONFIG
 ========================= */
 
-const SUPABASE_URL =
-  "https://njngyqvxrilrsqyzhhds.supabase.co";
+const SUPABASE_URL = "https://njngyqvxrilrsqyzhhds.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbmd5cXZ4cmlscnNxeXpoaGRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzE3MTYsImV4cCI6MjA5NDcwNzcxNn0.P6lTSXcaOHmTvHQEUXMGwDduyXjhDm41iPQSAGNO9rc";
 
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbmd5cXZ4cmlscnNxeXpoaGRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzE3MTYsImV4cCI6MjA5NDcwNzcxNn0.P6lTSXcaOHmTvHQEUXMGwDduyXjhDm41iPQSAGNO9rc";
-
-
-/* IMPORTANT:
-   USE "db" NOT "supabase"
-*/
-
-const db =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =========================
    DATA
 ========================= */
 
-const days=[
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday"
-];
+const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const mealTypes = ["Breakfast","Lunch","Dinner"];
 
-const mealTypes=[
-  "Breakfast",
-  "Lunch",
-  "Dinner"
-];
-
-let plannerData={};
-
-const board=
-  document.getElementById("board");
-
-const statusEl=
-  document.getElementById("status");
-
-let dragged=null;
+let plannerData = {};
+const board = document.getElementById("board");
+const statusEl = document.getElementById("status");
+let dragged = null;
 
 /* =========================
-   STATUS MESSAGE
+   DEBOUNCE AUTOSAVE
 ========================= */
 
+const saveTimers = {};
+const SAVE_DELAY = 1000;
+
 function showStatus(message){
-
-  statusEl.textContent=message;
-
+  statusEl.textContent = message;
   statusEl.classList.add("show");
 
   clearTimeout(statusEl.timer);
-
-  statusEl.timer=setTimeout(()=>{
-
+  statusEl.timer = setTimeout(() => {
     statusEl.classList.remove("show");
+  }, 1500);
+}
 
-  },1500);
+function scheduleSave(day){
+  clearTimeout(saveTimers[day]);
+  showStatus("Saving...");
+
+  saveTimers[day] = setTimeout(() => {
+    save(day);
+  }, SAVE_DELAY);
 }
 
 /* =========================
@@ -280,44 +222,24 @@ function showStatus(message){
 
 async function init(){
 
-  /* ENSURE DAYS EXIST */
+  days.forEach(day => plannerData[day] = []);
 
-  days.forEach(day=>{
-
-    plannerData[day]=[];
-
-  });
-
-  /* LOAD DATABASE */
-
-  const {
-    data,
-    error
-  } = await db
+  const { data, error } = await db
     .from("meal_planner")
     .select("*")
     .order("position");
 
   if(error){
-
     console.error(error);
-
     showStatus("Load failed");
-
     return;
   }
 
-  /* GROUP BY DAY */
-
-  data.forEach(row=>{
-
+  data.forEach(row => {
     plannerData[row.day].push({
-
-      type:row.meal_type,
-
-      text:row.meal_text
+      type: row.meal_type,
+      text: row.meal_text
     });
-
   });
 }
 
@@ -327,71 +249,40 @@ async function init(){
 
 async function save(day){
 
-  const col=document.querySelector(
-    `[data-day="${day}"] .card-list`
-  );
+  const col = document.querySelector(`[data-day="${day}"] .card-list`);
 
-  plannerData[day]=[
-    ...col.querySelectorAll(".card")
-  ].map((c,index)=>({
-
-    type:c.querySelector("select").value,
-
-    text:c.querySelector(".content")
-      .innerText
-      .trim(),
-
-    position:index
+  plannerData[day] = [...col.querySelectorAll(".card")].map((c,index)=>({
+    type: c.querySelector("select").value,
+    text: c.querySelector(".content").innerText.trim(),
+    position: index
   }));
 
-  /* DELETE OLD ROWS */
-
-  const {
-    error:deleteError
-  } = await db
+  const { error: deleteError } = await db
     .from("meal_planner")
     .delete()
-    .eq("day",day);
+    .eq("day", day);
 
   if(deleteError){
-
     console.error(deleteError);
-
     showStatus("Save failed");
-
     return;
   }
 
-  /* CREATE NEW ROWS */
-
-  const rows=
-    plannerData[day].map(card=>({
-
-      day:day,
-
-      meal_type:card.type,
-
-      meal_text:card.text,
-
-      position:card.position
-    }));
-
-  /* INSERT NEW ROWS */
+  const rows = plannerData[day].map(card => ({
+    day,
+    meal_type: card.type,
+    meal_text: card.text,
+    position: card.position
+  }));
 
   if(rows.length){
-
-    const {
-      error:insertError
-    } = await db
+    const { error: insertError } = await db
       .from("meal_planner")
       .insert(rows);
 
     if(insertError){
-
       console.error(insertError);
-
       showStatus("Save failed");
-
       return;
     }
   }
@@ -403,105 +294,54 @@ async function save(day){
    CREATE CARD
 ========================= */
 
-function createCard(data,day){
+function createCard(data, day){
 
-  const card=document.createElement("div");
+  const card = document.createElement("div");
+  card.className = "card";
+  card.draggable = true;
 
-  card.className="card";
-
-  card.draggable=true;
-
-  card.innerHTML=`
+  card.innerHTML = `
     <div class="card-top">
-
-      <select
-        class="meal-type meal-${data.type.toLowerCase()}"
-      >
-
-        ${mealTypes.map(t=>`
-
-          <option
-            ${t===data.type ? "selected" : ""}
-          >
-            ${t}
-          </option>
-
+      <select class="meal-type meal-${data.type.toLowerCase()}">
+        ${mealTypes.map(t => `
+          <option ${t === data.type ? "selected" : ""}>${t}</option>
         `).join("")}
-
       </select>
 
-      <button class="delete-btn">
-        ✕
-      </button>
-
+      <button class="delete-btn">✕</button>
     </div>
 
-    <div
-      class="content"
-      contenteditable="true"
-    >
-      ${data.text}
+    <div class="content" contenteditable="true">
+      ${data.text || ""}
     </div>
   `;
 
-  const select=
-    card.querySelector("select");
+  const select = card.querySelector("select");
+  const content = card.querySelector(".content");
+  const del = card.querySelector(".delete-btn");
 
-  const content=
-    card.querySelector(".content");
-
-  const del=
-    card.querySelector(".delete-btn");
-
-  /* TYPE CHANGE */
-
-  select.onchange=()=>{
-
-    select.className=
-      `meal-type meal-${select.value.toLowerCase()}`;
-
-    save(day);
+  select.onchange = () => {
+    select.className = `meal-type meal-${select.value.toLowerCase()}`;
+    scheduleSave(day);
   };
 
-  /* TEXT CHANGE */
-
-  content.oninput=()=>{
-
-    save(day);
+  content.oninput = () => {
+    scheduleSave(day);
   };
 
-  /* DELETE */
-
-  del.onclick=()=>{
-
+  del.onclick = () => {
     card.remove();
-
-    save(day);
+    scheduleSave(day);
   };
 
-  /* DESKTOP DRAG START */
+  card.addEventListener("dragstart", () => {
+    card.classList.add("dragging");
+  });
 
-  card.addEventListener(
-    "dragstart",
-    ()=>{
-
-      card.classList.add("dragging");
-    }
-  );
-
-  /* DESKTOP DRAG END */
-
-  card.addEventListener(
-    "dragend",
-    ()=>{
-
-      card.classList.remove("dragging");
-
-      /* SAVE ALL DAYS */
-
-      days.forEach(d=>save(d));
-    }
-  );
+  card.addEventListener("dragend", () => {
+    card.classList.remove("dragging");
+    days.forEach(d => scheduleSave(d));
+  });
 
   return card;
 }
@@ -512,87 +352,49 @@ function createCard(data,day){
 
 function build(){
 
-  board.innerHTML="";
+  board.innerHTML = "";
 
-  days.forEach(day=>{
+  days.forEach(day => {
 
-    const col=document.createElement("div");
+    const col = document.createElement("div");
+    col.className = `column day-${day.toLowerCase()}`;
+    col.dataset.day = day;
 
-    col.className=
-      `column day-${day.toLowerCase()}`;
-
-    col.dataset.day=day;
-
-    col.innerHTML=`
+    col.innerHTML = `
       <h2>${day}</h2>
-
       <div class="card-list"></div>
-
-      <button class="add-btn">
-        + Add Meal
-      </button>
+      <button class="add-btn">+ Add Meal</button>
     `;
 
-    const list=
-      col.querySelector(".card-list");
+    const list = col.querySelector(".card-list");
 
-    /* LOAD SAVED CARDS */
-
-    plannerData[day].forEach(card=>{
-
-      list.appendChild(
-        createCard(card,day)
-      );
+    plannerData[day].forEach(card => {
+      list.appendChild(createCard(card, day));
     });
 
-    /* ADD NEW CARD */
+    col.querySelector(".add-btn").onclick = () => {
+      list.appendChild(createCard({
+        type: "Dinner",
+        text: ""
+      }, day));
 
-    col.querySelector(".add-btn")
-      .onclick=()=>{
-
-      list.appendChild(
-
-        createCard(
-          {
-            type:"Dinner",
-            text:""
-          },
-          day
-        )
-      );
-
-      save(day);
+      scheduleSave(day);
     };
 
-    /* DESKTOP DROP */
+    col.addEventListener("dragover", e => {
+      e.preventDefault();
 
-    col.addEventListener(
-      "dragover",
-      e=>{
+      const drag = document.querySelector(".dragging");
+      if(!drag) return;
 
-        e.preventDefault();
+      const after = getAfter(list, e.clientY);
 
-        const drag=
-          document.querySelector(".dragging");
-
-        if(!drag) return;
-
-        const after=
-          getAfter(list,e.clientY);
-
-        if(after==null){
-
-          list.appendChild(drag);
-
-        }else{
-
-          list.insertBefore(
-            drag,
-            after
-          );
-        }
+      if(after == null){
+        list.appendChild(drag);
+      } else {
+        list.insertBefore(drag, after);
       }
-    );
+    });
 
     board.appendChild(col);
   });
@@ -602,129 +404,70 @@ function build(){
    TOUCH DRAGGING
 ========================= */
 
-document.addEventListener(
-  "touchstart",
-  e=>{
+document.addEventListener("touchstart", e => {
+  const card = e.target.closest(".card");
+  if(!card) return;
 
-    const card=
-      e.target.closest(".card");
+  dragged = card;
+  card.classList.add("dragging");
+}, {passive:true});
 
-    if(!card) return;
+document.addEventListener("touchmove", e => {
+  if(!dragged) return;
 
-    dragged=card;
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const list = el?.closest(".card-list");
 
-    card.classList.add("dragging");
+  if(!list) return;
 
-  },
-  {passive:true}
-);
+  const after = getAfter(list, t.clientY);
 
-document.addEventListener(
-  "touchmove",
-  e=>{
-
-    if(!dragged) return;
-
-    const t=e.touches[0];
-
-    const el=
-      document.elementFromPoint(
-        t.clientX,
-        t.clientY
-      );
-
-    const list=
-      el?.closest(".card-list");
-
-    if(!list) return;
-
-    const after=
-      getAfter(list,t.clientY);
-
-    if(after==null){
-
-      list.appendChild(dragged);
-
-    }else{
-
-      list.insertBefore(
-        dragged,
-        after
-      );
-    }
-
-  },
-  {passive:true}
-);
-
-document.addEventListener(
-  "touchend",
-  ()=>{
-
-    if(!dragged) return;
-
-    dragged.classList.remove("dragging");
-
-    /* SAVE ALL DAYS */
-
-    days.forEach(d=>save(d));
-
-    dragged=null;
+  if(after == null){
+    list.appendChild(dragged);
+  } else {
+    list.insertBefore(dragged, after);
   }
-);
+
+}, {passive:true});
+
+document.addEventListener("touchend", () => {
+  if(!dragged) return;
+
+  dragged.classList.remove("dragging");
+  days.forEach(d => scheduleSave(d));
+  dragged = null;
+});
 
 /* =========================
-   REORDER HELPER
+   HELPER
 ========================= */
 
-function getAfter(container,y){
+function getAfter(container, y){
 
-  const cards=[
-    ...container.querySelectorAll(
-      ".card:not(.dragging)"
-    )
-  ];
+  const cards = [...container.querySelectorAll(".card:not(.dragging)")];
 
-  return cards.reduce(
+  return cards.reduce((closest, child) => {
 
-    (closest,child)=>{
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
 
-      const box=
-        child.getBoundingClientRect();
+    if(offset < 0 && offset > closest.offset){
+      return { offset, element: child };
+    }
 
-      const offset=
-        y-box.top-box.height/2;
+    return closest;
 
-      if(
-        offset<0 &&
-        offset>closest.offset
-      ){
-
-        return {
-          offset,
-          element:child
-        };
-      }
-
-      return closest;
-
-    },
-
-    {offset:-Infinity}
-
-  ).element;
+  }, { offset: -Infinity }).element;
 }
 
 /* =========================
-   START APP
+   START
 ========================= */
 
-(async ()=>{
-
+(async () => {
   await init();
-
   build();
-
 })();
 </script>
 
