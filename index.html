@@ -16,10 +16,19 @@
   --radius:18px;
 }
 
-*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body{ margin:0; font-family:system-ui,sans-serif; background:#f4f7fb; user-select:none; }
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-/* Day colors */
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:#f4f7fb;
+  user-select:none;
+}
+
+/* DAY COLORS */
 .day-monday{ background:#e0f2fe; }
 .day-tuesday{ background:#ecfccb; }
 .day-wednesday{ background:#fef9c3; }
@@ -28,68 +37,130 @@ body{ margin:0; font-family:system-ui,sans-serif; background:#f4f7fb; user-selec
 .day-saturday{ background:#ffedd5; }
 .day-sunday{ background:#f1f5f9; }
 
+/* HEADER */
 header{
-  position:sticky; top:0; background:linear-gradient(135deg,#0ea5e9,#2563eb);
-  color:white; padding:16px; z-index:100;
+  position:sticky;
+  top:0;
+  background:linear-gradient(135deg,#0ea5e9,#2563eb);
+  color:white;
+  padding:16px;
+  z-index:100;
 }
 header h1{ margin:0; }
 
+/* BOARD */
 #board{
-  max-width:850px; margin:auto; padding:16px; display:flex; flex-direction:column; gap:16px;
+  max-width:850px;
+  margin:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
 }
 
+/* COLUMN */
 .column{
-  border-radius:var(--radius); padding:12px; box-shadow:var(--shadow);
+  border-radius:var(--radius);
+  padding:12px;
+  box-shadow:var(--shadow);
 }
 
+/* CARD LIST */
 .card-list{ min-height:50px; }
 
-.card{
-  background:#fff; border-radius:14px; padding:12px; margin-bottom:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06); cursor:grab;
+/* CARD - fully fluid */
+.card {
+  max-width: 90%;
+  width: 90%;
+  margin: 0 auto 10px auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: grab;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
-  touch-action:none;
+  touch-action: none;
 }
 
-.card.dragging{ opacity:0.7; transform:scale(1.03); box-shadow:0 12px 25px rgba(0,0,0,0.15); }
+.card.dragging{
+  opacity:0.7;
+  transform:scale(1.03);
+  box-shadow:0 12px 25px rgba(0,0,0,0.15);
+}
 
 .card-top{
-  display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  gap:10px;
 }
 
 .meal-type{
-  border:none; border-radius:999px; padding:6px 10px; font-weight:700; font-size:0.8rem;
+  border:none;
+  border-radius:999px;
+  padding:6px 10px;
+  font-weight:700;
+  font-size:0.8rem;
 }
 .meal-breakfast{ background:#fef3c7; color:#92400e; }
 .meal-lunch{ background:#dbeafe; color:#1d4ed8; }
 .meal-dinner{ background:#fee2e2; color:#991b1b; }
 
 .delete-btn{
-  background:transparent; border:none; color:var(--danger); font-size:18px; font-weight:700;
-  cursor:pointer; min-width:40px; min-height:40px; border-radius:10px;
+  background:transparent;
+  border:none;
+  color:var(--danger);
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  min-width:40px;
+  min-height:40px;
+  border-radius:10px;
 }
 .delete-btn:active{ transform:scale(0.9); }
 
-.content{ min-height:40px; outline:none; user-select:text; }
-
-.add-btn{
-  width:100%; padding:12px; background:var(--primary); color:white; border:none;
-  border-radius:12px; cursor:pointer; font-weight:600;
+.content{
+  min-height:40px;
+  outline:none;
+  user-select:text;
 }
+
+/* ADD BUTTON - fully fluid */
+.add-btn{
+  width: 90%;
+  max-width: 90%;
+  margin: 0 auto;
+  display: block;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
 .add-btn:active{ transform:scale(0.98); }
 
+/* STATUS */
 .status{
-  position:fixed; bottom:16px; right:16px; background:#111827; color:white;
-  padding:10px 14px; border-radius:999px; font-size:0.85rem;
-  opacity:0; transform:translateY(10px); transition:all 0.25s ease;
+  position:fixed;
+  bottom:16px;
+  right:16px;
+  background:#111827;
+  color:white;
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:0.85rem;
+  opacity:0;
+  transform:translateY(10px);
+  transition:all 0.25s ease;
 }
-.status.show{ opacity:1; transform:translateY(0); }
 
-/* Mobile tweaks */
-@media (max-width:600px){
-  #board, .column{ padding:8px; }
-  .card{ max-width:90%; margin:0 auto; }
-  .add-btn{ font-size:0.9rem; padding:10px; }
+.status.show{
+  opacity:1;
+  transform:translateY(0);
 }
 </style>
 </head>
