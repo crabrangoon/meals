@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Meal Planner</title>
-<!-- Favicon -->
 <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
 <style>
 :root{
   --card:#fff;
@@ -16,19 +16,10 @@
   --radius:18px;
 }
 
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body{ margin:0; font-family:system-ui,sans-serif; background:#f4f7fb; user-select:none; }
 
-body{
-  margin:0;
-  font-family:system-ui,sans-serif;
-  background:#f4f7fb;
-  user-select:none;
-}
-
-/* DAY COLORS */
+/* Day colors */
 .day-monday{ background:#e0f2fe; }
 .day-tuesday{ background:#ecfccb; }
 .day-wednesday{ background:#fef9c3; }
@@ -38,164 +29,82 @@ body{
 .day-sunday{ background:#f1f5f9; }
 
 header{
-  position:sticky;
-  top:0;
-  background:linear-gradient(135deg,#0ea5e9,#2563eb);
-  color:white;
-  padding:16px;
-  z-index:100;
+  position:sticky; top:0; background:linear-gradient(135deg,#0ea5e9,#2563eb);
+  color:white; padding:16px; z-index:100;
 }
-
 header h1{ margin:0; }
 
 #board{
-  max-width:850px;
-  margin:auto;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
+  max-width:850px; margin:auto; padding:16px; display:flex; flex-direction:column; gap:16px;
 }
 
 .column{
-  border-radius:var(--radius);
-  padding:12px;
-  box-shadow:var(--shadow);
+  border-radius:var(--radius); padding:12px; box-shadow:var(--shadow);
 }
 
 .card-list{ min-height:50px; }
 
 .card{
-  background:#fff;
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);
-  cursor:grab;
+  background:#fff; border-radius:14px; padding:12px; margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06); cursor:grab;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   touch-action:none;
 }
 
-.card.dragging{
-  opacity:0.7;
-  transform:scale(1.03);
-  box-shadow:0 12px 25px rgba(0,0,0,0.15);
-}
+.card.dragging{ opacity:0.7; transform:scale(1.03); box-shadow:0 12px 25px rgba(0,0,0,0.15); }
 
 .card-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
-  gap:10px;
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:10px;
 }
 
 .meal-type{
-  border:none;
-  border-radius:999px;
-  padding:6px 10px;
-  font-weight:700;
-  font-size:0.8rem;
+  border:none; border-radius:999px; padding:6px 10px; font-weight:700; font-size:0.8rem;
 }
-
 .meal-breakfast{ background:#fef3c7; color:#92400e; }
 .meal-lunch{ background:#dbeafe; color:#1d4ed8; }
 .meal-dinner{ background:#fee2e2; color:#991b1b; }
 
 .delete-btn{
-  background:transparent;
-  border:none;
-  color:var(--danger);
-  font-size:18px;
-  font-weight:700;
-  cursor:pointer;
-  min-width:40px;
-  min-height:40px;
-  border-radius:10px;
+  background:transparent; border:none; color:var(--danger); font-size:18px; font-weight:700;
+  cursor:pointer; min-width:40px; min-height:40px; border-radius:10px;
 }
-
 .delete-btn:active{ transform:scale(0.9); }
 
-.content{
-  min-height:40px;
-  outline:none;
-  user-select:text;
-}
+.content{ min-height:40px; outline:none; user-select:text; }
 
 .add-btn{
-  width:100%;
-  padding:12px;
-  background:var(--primary);
-  color:white;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:600;
+  width:100%; padding:12px; background:var(--primary); color:white; border:none;
+  border-radius:12px; cursor:pointer; font-weight:600;
 }
-
 .add-btn:active{ transform:scale(0.98); }
 
 .status{
-  position:fixed;
-  bottom:16px;
-  right:16px;
-  background:#111827;
-  color:white;
-  padding:10px 14px;
-  border-radius:999px;
-  font-size:0.85rem;
-  opacity:0;
-  transform:translateY(10px);
-  transition:all 0.25s ease;
+  position:fixed; bottom:16px; right:16px; background:#111827; color:white;
+  padding:10px 14px; border-radius:999px; font-size:0.85rem;
+  opacity:0; transform:translateY(10px); transition:all 0.25s ease;
 }
+.status.show{ opacity:1; transform:translateY(0); }
 
-.status.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-/* =========================
-   MOBILE RESPONSIVE CARDS
-========================= */
-@media (max-width: 600px) {
-  #board {
-    padding: 8px;
-  }
-
-  .column {
-    padding: 8px;
-  }
-
-  .card {
-    max-width: 90%;       /* narrower cards */
-    margin-left: auto;
-    margin-right: auto;   /* center horizontally */
-  }
-
-  .add-btn {
-    font-size: 0.9rem;
-    padding: 10px;
-  }
+/* Mobile tweaks */
+@media (max-width:600px){
+  #board, .column{ padding:8px; }
+  .card{ max-width:90%; margin:0 auto; }
+  .add-btn{ font-size:0.9rem; padding:10px; }
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>🍽️ Meal Planner</h1>
-</header>
-
+<header><h1>🍽️ Meal Planner</h1></header>
 <main id="board"></main>
-
 <div id="status" class="status">Saved</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const SUPABASE_URL = "https://njngyqvxrilrsqyzhhds.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbmd5cXZ4cmlscnNxeXpoaGRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzE3MTYsImV4cCI6MjA5NDcwNzcxNn0.P6lTSXcaOHmTvHQEUXMGwDduyXjhDm41iPQSAGNO9rc";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_KEY = "YOUR_KEY_HERE"; // replace with your key
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const mealTypes = ["Breakfast","Lunch","Dinner"];
@@ -210,11 +119,8 @@ const SAVE_DELAY = 1000;
 function showStatus(message){
   statusEl.textContent = message;
   statusEl.classList.add("show");
-
   clearTimeout(statusEl.timer);
-  statusEl.timer = setTimeout(() => {
-    statusEl.classList.remove("show");
-  }, 1500);
+  statusEl.timer = setTimeout(() => statusEl.classList.remove("show"), 1500);
 }
 
 function scheduleSave(day){
@@ -223,171 +129,116 @@ function scheduleSave(day){
   saveTimers[day] = setTimeout(() => save(day), SAVE_DELAY);
 }
 
+// Load data
 async function init(){
-  days.forEach(day => plannerData[day] = []);
+  days.forEach(day => plannerData[day]=[]);
   const { data, error } = await db.from("meal_planner").select("*").order("position");
-  if(error){
-    console.error(error);
-    showStatus("Load failed");
-    return;
-  }
-  data.forEach(row => {
-    plannerData[row.day].push({
-      type: row.meal_type,
-      text: row.meal_text
-    });
-  });
+  if(error){ console.error(error); showStatus("Load failed"); return; }
+  data.forEach(row => plannerData[row.day].push({ type:row.meal_type, text:row.meal_text }));
 }
 
+// Save data
 async function save(day){
   const col = document.querySelector(`[data-day="${day}"] .card-list`);
-  plannerData[day] = [...col.querySelectorAll(".card")].map((c,index)=>({
-    type: c.querySelector("select").value,
-    text: c.querySelector(".content").innerText.trim(),
-    position: index
+  plannerData[day] = [...col.children].map((card, i)=>({
+    type: card.querySelector("select").value,
+    text: card.querySelector(".content").innerText.trim(),
+    position: i
   }));
 
-  const { error: deleteError } = await db.from("meal_planner").delete().eq("day", day);
-  if(deleteError){
-    console.error(deleteError);
-    showStatus("Save failed");
-    return;
-  }
-
-  const rows = plannerData[day].map(card => ({
-    day,
-    meal_type: card.type,
-    meal_text: card.text,
-    position: card.position
-  }));
-
-  if(rows.length){
-    const { error: insertError } = await db.from("meal_planner").insert(rows);
-    if(insertError){
-      console.error(insertError);
-      showStatus("Save failed");
-      return;
-    }
-  }
+  await db.from("meal_planner").delete().eq("day", day);
+  const rows = plannerData[day].map(c=>({day, meal_type:c.type, meal_text:c.text, position:c.position}));
+  if(rows.length) await db.from("meal_planner").insert(rows);
 
   showStatus("Saved");
 }
 
+// Create card
 function createCard(data, day){
   const card = document.createElement("div");
   card.className = "card";
   card.draggable = true;
 
-  card.innerHTML = `
-    <div class="card-top">
-      <select class="meal-type meal-${data.type.toLowerCase()}">
-        ${mealTypes.map(t => `<option ${t === data.type ? "selected" : ""}>${t}</option>`).join("")}
-      </select>
-      <button class="delete-btn">✕</button>
-    </div>
-    <div class="content" contenteditable="true">${data.text || ""}</div>
-  `;
+  const cardTop = document.createElement("div");
+  cardTop.className = "card-top";
 
-  const select = card.querySelector("select");
-  const content = card.querySelector(".content");
-  const del = card.querySelector(".delete-btn");
-
-  select.onchange = () => {
-    select.className = `meal-type meal-${select.value.toLowerCase()}`;
-    scheduleSave(day);
-  };
-
-  content.oninput = () => scheduleSave(day);
-
-  del.onclick = () => {
-    card.remove();
-    scheduleSave(day);
-  };
-
-  card.addEventListener("dragstart", () => card.classList.add("dragging"));
-  card.addEventListener("dragend", () => {
-    card.classList.remove("dragging");
-    days.forEach(d => scheduleSave(d));
+  const select = document.createElement("select");
+  select.className = `meal-type meal-${data.type.toLowerCase()}`;
+  mealTypes.forEach(t=>{
+    const opt = document.createElement("option");
+    opt.value=t; opt.text=t;
+    if(t===data.type) opt.selected=true;
+    select.appendChild(opt);
   });
+  select.addEventListener("change", ()=>{
+    select.className=`meal-type meal-${select.value.toLowerCase()}`;
+    scheduleSave(day);
+  });
+
+  const delBtn = document.createElement("button");
+  delBtn.className="delete-btn"; delBtn.textContent="✕";
+  delBtn.onclick = ()=>{ card.remove(); scheduleSave(day); };
+
+  cardTop.append(select, delBtn);
+  const content = document.createElement("div");
+  content.className="content"; content.contentEditable=true;
+  content.innerText=data.text||"";
+  content.addEventListener("input", ()=>scheduleSave(day));
+
+  card.append(cardTop, content);
+
+  card.addEventListener("dragstart", ()=>card.classList.add("dragging"));
+  card.addEventListener("dragend", ()=>{ card.classList.remove("dragging"); days.forEach(d=>scheduleSave(d)); });
 
   return card;
 }
 
+// Build board
 function build(){
-  board.innerHTML = "";
-  days.forEach(day => {
+  board.innerHTML="";
+  days.forEach(day=>{
     const col = document.createElement("div");
-    col.className = `column day-${day.toLowerCase()}`;
-    col.dataset.day = day;
+    col.className=`column day-${day.toLowerCase()}`;
+    col.dataset.day=day;
 
-    col.innerHTML = `
-      <h2>${day}</h2>
-      <div class="card-list"></div>
-      <button class="add-btn">+ Add Meal</button>
-    `;
+    const h2 = document.createElement("h2"); h2.textContent=day;
+    const list = document.createElement("div"); list.className="card-list";
+    const addBtn = document.createElement("button"); addBtn.className="add-btn"; addBtn.textContent="+ Add Meal";
+    addBtn.onclick=()=>{ list.appendChild(createCard({type:"Dinner",text:""},day)); scheduleSave(day); }
 
-    const list = col.querySelector(".card-list");
-
-    plannerData[day].forEach(card => list.appendChild(createCard(card, day)));
-
-    col.querySelector(".add-btn").onclick = () => {
-      list.appendChild(createCard({ type: "Dinner", text: "" }, day));
-      scheduleSave(day);
-    };
-
-    col.addEventListener("dragover", e => {
-      e.preventDefault();
-      const drag = document.querySelector(".dragging");
-      if(!drag) return;
-      const after = getAfter(list, e.clientY);
-      if(after == null) list.appendChild(drag);
-      else list.insertBefore(drag, after);
-    });
-
+    plannerData[day].forEach(c=>list.appendChild(createCard(c, day)));
+    col.append(h2,list,addBtn);
     board.appendChild(col);
+
+    // Drag & drop
+    col.addEventListener("dragover", e=>{
+      e.preventDefault();
+      const drag=document.querySelector(".dragging");
+      if(!drag) return;
+      const after = getAfter(list,e.clientY);
+      if(after==null) list.appendChild(drag);
+      else list.insertBefore(drag,after);
+    });
   });
 }
 
-document.addEventListener("touchstart", e => {
-  const card = e.target.closest(".card");
-  if(!card) return;
-  dragged = card;
-  card.classList.add("dragging");
-}, {passive:true});
-
-document.addEventListener("touchmove", e => {
-  if(!dragged) return;
-  const t = e.touches[0];
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  const list = el?.closest(".card-list");
-  if(!list) return;
-  const after = getAfter(list, t.clientY);
-  if(after == null) list.appendChild(dragged);
-  else list.insertBefore(dragged, after);
-}, {passive:true});
-
-document.addEventListener("touchend", () => {
-  if(!dragged) return;
-  dragged.classList.remove("dragging");
-  days.forEach(d => scheduleSave(d));
-  dragged = null;
-});
-
-function getAfter(container, y){
-  const cards = [...container.querySelectorAll(".card:not(.dragging)")];
-  return cards.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if(offset < 0 && offset > closest.offset) return { offset, element: child };
+// Drag helpers
+function getAfter(container,y){
+  const cards=[...container.querySelectorAll(".card:not(.dragging)")];
+  return cards.reduce((closest, child)=>{
+    const box=child.getBoundingClientRect();
+    const offset=y-box.top-box.height/2;
+    if(offset<0 && offset>closest.offset) return {offset,element:child};
     return closest;
-  }, { offset: -Infinity }).element;
+  },{offset:-Infinity}).element;
 }
 
-(async () => {
-  await init();
-  build();
-})();
-</script>
+// Touch drag
+document.addEventListener("touchstart", e=>{ const card=e.target.closest(".card"); if(!card) return; dragged=card; card.classList.add("dragging"); }, {passive:true});
+document.addEventListener("touchmove", e=>{ if(!dragged) return; const t=e.touches[0]; const el=document.elementFromPoint(t.clientX,t.clientY); const list=el?.closest(".card-list"); if(!list) return; const after=getAfter(list,t.clientY); if(after==null) list.appendChild(dragged); else list.insertBefore(dragged,after); }, {passive:true});
+document.addEventListener("touchend", ()=>{ if(!dragged) return; dragged.classList.remove("dragging"); days.forEach(d=>scheduleSave(d)); dragged=null; });
 
+(async()=>{ await init(); build(); })();
+</script>
 </body>
 </html>
