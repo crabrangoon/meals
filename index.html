@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
 <title>Meal Planner</title>
 
 <style>
@@ -153,6 +152,30 @@ header h1{ margin:0; }
   opacity:1;
   transform:translateY(0);
 }
+
+/* =========================
+   MOBILE RESPONSIVE CARDS
+========================= */
+@media (max-width: 600px) {
+  #board {
+    padding: 8px;
+  }
+
+  .column {
+    padding: 8px;
+  }
+
+  .card {
+    max-width: 90%;       /* narrower cards */
+    margin-left: auto;
+    margin-right: auto;   /* center horizontally */
+  }
+
+  .add-btn {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}
 </style>
 </head>
 
@@ -169,30 +192,16 @@ header h1{ margin:0; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-/* =========================
-   SUPABASE CONFIG
-========================= */
-
 const SUPABASE_URL = "https://njngyqvxrilrsqyzhhds.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbmd5cXZ4cmlscnNxeXpoaGRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzE3MTYsImV4cCI6MjA5NDcwNzcxNn0.P6lTSXcaOHmTvHQEUXMGwDduyXjhDm41iPQSAGNO9rc";
-
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* =========================
-   DATA
-========================= */
 
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const mealTypes = ["Breakfast","Lunch","Dinner"];
-
 let plannerData = {};
 const board = document.getElementById("board");
 const statusEl = document.getElementById("status");
 let dragged = null;
-
-/* =========================
-   DEBOUNCE AUTOSAVE
-========================= */
 
 const saveTimers = {};
 const SAVE_DELAY = 1000;
@@ -210,31 +219,17 @@ function showStatus(message){
 function scheduleSave(day){
   clearTimeout(saveTimers[day]);
   showStatus("Saving...");
-
-  saveTimers[day] = setTimeout(() => {
-    save(day);
-  }, SAVE_DELAY);
+  saveTimers[day] = setTimeout(() => save(day), SAVE_DELAY);
 }
 
-/* =========================
-   LOAD FROM SUPABASE
-========================= */
-
 async function init(){
-
   days.forEach(day => plannerData[day] = []);
-
-  const { data, error } = await db
-    .from("meal_planner")
-    .select("*")
-    .order("position");
-
+  const { data, error } = await db.from("meal_planner").select("*").order("position");
   if(error){
     console.error(error);
     showStatus("Load failed");
     return;
   }
-
   data.forEach(row => {
     plannerData[row.day].push({
       type: row.meal_type,
@@ -243,25 +238,15 @@ async function init(){
   });
 }
 
-/* =========================
-   SAVE TO SUPABASE
-========================= */
-
 async function save(day){
-
   const col = document.querySelector(`[data-day="${day}"] .card-list`);
-
   plannerData[day] = [...col.querySelectorAll(".card")].map((c,index)=>({
     type: c.querySelector("select").value,
     text: c.querySelector(".content").innerText.trim(),
     position: index
   }));
 
-  const { error: deleteError } = await db
-    .from("meal_planner")
-    .delete()
-    .eq("day", day);
-
+  const { error: deleteError } = await db.from("meal_planner").delete().eq("day", day);
   if(deleteError){
     console.error(deleteError);
     showStatus("Save failed");
@@ -276,10 +261,7 @@ async function save(day){
   }));
 
   if(rows.length){
-    const { error: insertError } = await db
-      .from("meal_planner")
-      .insert(rows);
-
+    const { error: insertError } = await db.from("meal_planner").insert(rows);
     if(insertError){
       console.error(insertError);
       showStatus("Save failed");
@@ -290,12 +272,7 @@ async function save(day){
   showStatus("Saved");
 }
 
-/* =========================
-   CREATE CARD
-========================= */
-
 function createCard(data, day){
-
   const card = document.createElement("div");
   card.className = "card";
   card.draggable = true;
@@ -303,17 +280,11 @@ function createCard(data, day){
   card.innerHTML = `
     <div class="card-top">
       <select class="meal-type meal-${data.type.toLowerCase()}">
-        ${mealTypes.map(t => `
-          <option ${t === data.type ? "selected" : ""}>${t}</option>
-        `).join("")}
+        ${mealTypes.map(t => `<option ${t === data.type ? "selected" : ""}>${t}</option>`).join("")}
       </select>
-
       <button class="delete-btn">✕</button>
     </div>
-
-    <div class="content" contenteditable="true">
-      ${data.text || ""}
-    </div>
+    <div class="content" contenteditable="true">${data.text || ""}</div>
   `;
 
   const select = card.querySelector("select");
@@ -325,19 +296,14 @@ function createCard(data, day){
     scheduleSave(day);
   };
 
-  content.oninput = () => {
-    scheduleSave(day);
-  };
+  content.oninput = () => scheduleSave(day);
 
   del.onclick = () => {
     card.remove();
     scheduleSave(day);
   };
 
-  card.addEventListener("dragstart", () => {
-    card.classList.add("dragging");
-  });
-
+  card.addEventListener("dragstart", () => card.classList.add("dragging"));
   card.addEventListener("dragend", () => {
     card.classList.remove("dragging");
     days.forEach(d => scheduleSave(d));
@@ -346,16 +312,9 @@ function createCard(data, day){
   return card;
 }
 
-/* =========================
-   BUILD UI
-========================= */
-
 function build(){
-
   board.innerHTML = "";
-
   days.forEach(day => {
-
     const col = document.createElement("div");
     col.className = `column day-${day.toLowerCase()}`;
     col.dataset.day = day;
@@ -368,102 +327,60 @@ function build(){
 
     const list = col.querySelector(".card-list");
 
-    plannerData[day].forEach(card => {
-      list.appendChild(createCard(card, day));
-    });
+    plannerData[day].forEach(card => list.appendChild(createCard(card, day)));
 
     col.querySelector(".add-btn").onclick = () => {
-      list.appendChild(createCard({
-        type: "Dinner",
-        text: ""
-      }, day));
-
+      list.appendChild(createCard({ type: "Dinner", text: "" }, day));
       scheduleSave(day);
     };
 
     col.addEventListener("dragover", e => {
       e.preventDefault();
-
       const drag = document.querySelector(".dragging");
       if(!drag) return;
-
       const after = getAfter(list, e.clientY);
-
-      if(after == null){
-        list.appendChild(drag);
-      } else {
-        list.insertBefore(drag, after);
-      }
+      if(after == null) list.appendChild(drag);
+      else list.insertBefore(drag, after);
     });
 
     board.appendChild(col);
   });
 }
 
-/* =========================
-   TOUCH DRAGGING
-========================= */
-
 document.addEventListener("touchstart", e => {
   const card = e.target.closest(".card");
   if(!card) return;
-
   dragged = card;
   card.classList.add("dragging");
 }, {passive:true});
 
 document.addEventListener("touchmove", e => {
   if(!dragged) return;
-
   const t = e.touches[0];
   const el = document.elementFromPoint(t.clientX, t.clientY);
   const list = el?.closest(".card-list");
-
   if(!list) return;
-
   const after = getAfter(list, t.clientY);
-
-  if(after == null){
-    list.appendChild(dragged);
-  } else {
-    list.insertBefore(dragged, after);
-  }
-
+  if(after == null) list.appendChild(dragged);
+  else list.insertBefore(dragged, after);
 }, {passive:true});
 
 document.addEventListener("touchend", () => {
   if(!dragged) return;
-
   dragged.classList.remove("dragging");
   days.forEach(d => scheduleSave(d));
   dragged = null;
 });
 
-/* =========================
-   HELPER
-========================= */
-
 function getAfter(container, y){
-
   const cards = [...container.querySelectorAll(".card:not(.dragging)")];
-
   return cards.reduce((closest, child) => {
-
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height / 2;
-
-    if(offset < 0 && offset > closest.offset){
-      return { offset, element: child };
-    }
-
+    if(offset < 0 && offset > closest.offset) return { offset, element: child };
     return closest;
-
   }, { offset: -Infinity }).element;
 }
-
-/* =========================
-   START
-========================= */
 
 (async () => {
   await init();
