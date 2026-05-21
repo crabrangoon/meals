@@ -126,7 +126,27 @@ input,textarea,select{
   background:var(--drop);
   border:2px dashed #60a5fa;
 }
+/* Make cards narrower on mobile for easier scrolling */
+@media (max-width: 600px) {
+  #board {
+    padding: 8px;
+  }
 
+  .column {
+    padding: 8px;
+  }
+
+  .card {
+    max-width: 90%;       /* limit card width */
+    margin-left: auto;    /* center horizontally */
+    margin-right: auto;
+  }
+
+  .add-btn {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}
 </style>
 </head>
 
